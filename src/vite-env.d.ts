@@ -1,6 +1,5 @@
 /// <reference types="vite/client" />
 
-// PNG / image assets
 declare module "*.png" {
   const src: string;
   export default src;
