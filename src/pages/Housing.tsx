@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react-hooks/static-components */
+
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -26,7 +27,7 @@ import {
   X,
 } from "lucide-react";
 
-/* ─── Types & Data ───────────────────────────────────────── */
+
 export interface HousingItem {
   id: number;
   name: string;
@@ -119,7 +120,7 @@ const MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_ID as string | undefined;
 const DEFAULT_CENTER = { lat: 42.3267, lng: 69.5901 };
 const DEFAULT_ZOOM = 13;
 
-/* ─── Nav ────────────────────────────────────────────────── */
+
 const navItems = [
   { id: "home",    label: "Home",    icon: <Home size={22} /> },
   { id: "jobs",    label: "Jobs",    icon: <BriefcaseBusiness size={22} /> },
@@ -128,7 +129,7 @@ const navItems = [
   { id: "profile", label: "Profile", icon: <User size={22} /> },
 ];
 
-/* ─── Sidebar ────────────────────────────────────────────── */
+
 const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }> = ({ activeNav, setActiveNav }) => {
   const navigate = useNavigate();
   return (
@@ -186,7 +187,7 @@ const ArrowRight = ({ size, color }: { size: number; color: string }) => (
   </svg>
 );
 
-/* ─── LocateButton ───────────────────────────────────────── */
+
 const LocateButton: React.FC<{ bottomOffset: number; userPos: { lat: number; lng: number } | null; onLocate: (pos: { lat: number; lng: number }) => void }> = ({ bottomOffset, onLocate }) => {
   const map = useMap();
   const [loading, setLoading] = useState(false);
@@ -207,7 +208,7 @@ const LocateButton: React.FC<{ bottomOffset: number; userPos: { lat: number; lng
   );
 };
 
-/* ─── Shared search dropdown ─────────────────────────────── */
+
 const SearchDropdown: React.FC<{ items: HousingItem[]; onSelect: (h: HousingItem) => void }> = ({ items, onSelect }) => (
   <div className="hmap-search-dropdown">
     {items.map(h => (
@@ -222,9 +223,7 @@ const SearchDropdown: React.FC<{ items: HousingItem[]; onSelect: (h: HousingItem
   </div>
 );
 
-/* ════════════════════════════════════════════════════════════
-   HOUSING MAP PAGE
-   ════════════════════════════════════════════════════════════ */
+
 export const HousingPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState("housing");
@@ -245,7 +244,7 @@ export const HousingPage: React.FC = () => {
 
   return (
     <div className="home-screen">
-      {/* MOBILE */}
+      {}
       <div className="home-mobile" style={{ height: "100vh", overflow: "hidden" }}>
         <div className="hmap-container">
           <APIProvider apiKey={MAPS_API_KEY}>
@@ -269,7 +268,7 @@ export const HousingPage: React.FC = () => {
             </Map>
           </APIProvider>
 
-          {/* Top controls */}
+          {}
           <div className="hmap-controls">
             <div className={`hmap-search-wrap ${showSearch ? "hmap-search-wrap--open" : ""}`}>
               {showSearch && (
@@ -297,7 +296,7 @@ export const HousingPage: React.FC = () => {
                 <button className={`hmap-toggle-btn hmap-toggle-btn--map ${!showList ? "hmap-toggle-btn--active" : ""}`} onClick={() => setShowList(false)}>
                   <MapIcon size={20} color={!showList ? "#fff" : "#462370"} />
                 </button>
-                {/* Filter icon → opens filter page */}
+                {}
                 <button className="hmap-toggle-btn" onClick={() => navigate("/housing/filter")}>
                   <SlidersHorizontal size={20} color="#462370" />
                 </button>
@@ -305,7 +304,7 @@ export const HousingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Bottom sheet */}
+          {}
           <div className={`hmap-sheet ${showList ? "hmap-sheet--open" : ""}`}>
             <div className="hmap-sheet-handle" />
             <div className="hmap-sheet-header">
@@ -330,7 +329,7 @@ export const HousingPage: React.FC = () => {
             <button className="hmap-close-btn" onClick={() => setShowList(false)}>Close</button>
           </div>
 
-          {/* Bottom nav */}
+          {}
           <div className="home-navbar hmap-navbar">
             {navItems.map(item => (
               <button key={item.id}
@@ -344,7 +343,7 @@ export const HousingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* DESKTOP */}
+      {}
       <div className="home-desktop" style={{ flex: 1 }}>
         <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} />
         <div className="home-main">
@@ -394,9 +393,7 @@ export const HousingPage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   HOUSING FILTER PAGE
-   ════════════════════════════════════════════════════════════ */
+
 export const HousingFilterPage: React.FC = () => {
   const navigate = useNavigate();
   const [location, setLocation] = useState("Shymkent, Kazakhstan");
@@ -544,9 +541,7 @@ export const HousingFilterPage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   HOUSING RESULTS PAGE
-   ════════════════════════════════════════════════════════════ */
+
 export const HousingResultsPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState("housing");
@@ -562,7 +557,7 @@ export const HousingResultsPage: React.FC = () => {
 
   const Content = () => (
     <div className="hresult-page">
-      {/* Search bar with dropdown */}
+      {}
       <div className="hresult-search-wrap">
         <div className="hresult-search-bar">
           <Search size={16} color="#A09DC5" />
@@ -656,16 +651,7 @@ export const HousingResultsPage: React.FC = () => {
     );
   })}
 </div>
-        {/* <div className="home-navbar">
-          {navItems.map(item => (
-            <button key={item.id}
-              className={`home-nav-item ${activeNav === item.id ? "home-nav-item--active" : "home-nav-item--inactive"}`}
-              onClick={() => { setActiveNav(item.id); if (item.id === "home") navigate("/home"); else if (item.id === "jobs") navigate("/jobs"); else if (item.id === "housing") navigate("/housing"); }}>
-              {item.icon}
-              <span className={`home-nav-label ${activeNav === item.id ? "home-nav-label--show" : "home-nav-label--hide"}`}>{item.label}</span>
-            </button>
-          ))}
-        </div> */}
+        {}
       </div>
       <div className="home-desktop" style={{ flex: 1 }}>
         <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} />
@@ -707,9 +693,7 @@ export const HousingResultsPage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   HOUSING DETAIL PAGE
-   ════════════════════════════════════════════════════════════ */
+
 export const HousingDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -832,9 +816,7 @@ export const HousingDetailPage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   CONTACT OWNER PAGE
-   ════════════════════════════════════════════════════════════ */
+
 export const ContactOwnerPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();

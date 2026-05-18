@@ -45,9 +45,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:id/register" element={<EventRegisterPage />} />
         <Route path="/events/:id/success" element={<EventRegisteredPage />} />
-<Route path="/profile" element={<ProfilePage />} />
-<Route path="/profile/basic-info" element={<BasicInfoPage />} />
-<Route path="/profile/applications" element={<MyApplicationsPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/basic-info" element={<BasicInfoPage />} />
+        <Route path="/profile/applications" element={<MyApplicationsPage />} />
 
       </Routes>
     </BrowserRouter>

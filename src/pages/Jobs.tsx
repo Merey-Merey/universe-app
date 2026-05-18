@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react-hooks/static-components */
+
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -211,9 +212,7 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   JOBS LIST PAGE
-   ════════════════════════════════════════════════════════════ */
+
 export const JobsPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState("jobs");
@@ -263,7 +262,7 @@ export const JobsPage: React.FC = () => {
         />
       </div>
 
-      {/* City filters */}
+      {}
       <div className="new-jobs-filters">
         {cityFilters.map(f => (
           <button
@@ -274,7 +273,7 @@ export const JobsPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Type filters */}
+      {}
       <div className="new-jobs-filters" style={{ marginTop: 6 }}>
         {typeFilters.map(f => (
           <button
@@ -285,7 +284,7 @@ export const JobsPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Top Pick */}
+      {}
       <p className="new-jobs-section-label">TOP PICK</p>
       <div
         className="new-job-top-pick"
@@ -307,12 +306,12 @@ export const JobsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Jobs section header */}
+      {}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "18px 0 10px" }}>
         <span className="new-jobs-section-jobs-title">Jobs</span>
       </div>
 
-      {/* Job list */}
+      {}
       <div className="new-jobs-list">
         {filtered.map(j => <JobListItem key={j.id} job={j} />)}
       </div>
@@ -322,7 +321,7 @@ export const JobsPage: React.FC = () => {
   return (
     <div className="home-screen">
 
-      {/* ══════ MOBILE ══════ */}
+      {}
       <div className="home-mobile" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
         <div style={{ flex: 1, overflowY: "auto" }}>
           <MainContent />
@@ -364,43 +363,14 @@ export const JobsPage: React.FC = () => {
     );
   })}
 </div>
-        {/* <div className="home-navbar">
-          {navItems.map(item => (
-            <button key={item.id}
-              className={`home-nav-item ${activeNav === item.id ? "home-nav-item--active" : "home-nav-item--inactive"}`}
-              onClick={() => { setActiveNav(item.id); if (item.id !== "jobs") navigate("/home"); }}>
-              {item.icon}
-              <span className={`home-nav-label ${activeNav === item.id ? "home-nav-label--show" : "home-nav-label--hide"}`}>
-                {item.label}
-              </span>
-            </button>
-          ))}
-        </div> */}
+        {}
       </div>
 
-      {/* ══════ DESKTOP ══════ */}
+      {}
       <div className="home-desktop" style={{ flex: 1 }}>
         <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} />
         <div className="home-main">
-          {/* <div className="home-topbar">
-            <div className="home-topbar__greeting">
-              <h1>Find your job</h1>
-              <p>234 open positions available</p>
-            </div>
-            <div className="home-topbar__right">
-              <div className="home-topbar__search">
-                <Search size={15} color="#A09DC5" />
-                <input className="ann-search-input"
-                  placeholder="Search jobs..."
-                  value={search} onChange={e => setSearch(e.target.value)}
-                  style={{ background: "none", border: "none", outline: "none", fontSize: 13, color: "#1E1B4B", fontFamily: "Space Grotesk, sans-serif", width: "100%" }} />
-              </div>
-              <div className="home-topbar__notif">
-                <Bell size={17} color="#1E1B4B" />
-                <div className="home-topbar__notif-dot" />
-              </div>
-            </div>
-          </div> */}
+          {}
           <div style={{ flex: 1, overflowY: "auto" }}>
             <div className="home-content">
               <MainContent />
@@ -412,9 +382,7 @@ export const JobsPage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   JOB DETAIL PAGE
-   ════════════════════════════════════════════════════════════ */
+
 export const JobDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -426,7 +394,7 @@ export const JobDetailPage: React.FC = () => {
   const DetailContent = () => (
     <div className="new-job-detail">
 
-      {/* Header card */}
+      {}
       <div className="new-job-detail__card">
         <div className="new-job-detail__card-top">
           <div className="new-job-detail__logo-wrap">
@@ -461,7 +429,7 @@ export const JobDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Info tiles */}
+      {}
       <div className="new-job-detail__info-tiles">
         <div className="new-job-detail__tile">
           <div className="new-job-detail__tile-value">{job.experience}</div>
@@ -477,13 +445,13 @@ export const JobDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* About */}
+      {}
       <div className="new-job-detail__section">
         <h3 className="new-job-detail__section-title">About the role</h3>
         <p className="new-job-detail__section-text">{job.about}</p>
       </div>
 
-      {/* Requirements */}
+      {}
       <div className="new-job-detail__section">
         <h3 className="new-job-detail__section-title">Requirements</h3>
         <div className="new-job-detail__reqs">
@@ -496,7 +464,7 @@ export const JobDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Skills */}
+      {}
       <div className="new-job-detail__section">
         <h3 className="new-job-detail__section-title">Skills</h3>
         <div className="new-job-detail__skills">
@@ -506,7 +474,7 @@ export const JobDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* About company */}
+      {}
       <div className="new-job-detail__section">
         <h3 className="new-job-detail__section-title">About the company</h3>
         <div className="new-job-detail__company-card">
@@ -521,7 +489,7 @@ export const JobDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Similar jobs */}
+      {}
       <div className="new-job-detail__section">
         <h3 className="new-job-detail__section-title">Similar jobs</h3>
         {JOBS.filter(j => j.id !== job.id).slice(0, 2).map(j => (
@@ -538,7 +506,7 @@ export const JobDetailPage: React.FC = () => {
         ))}
       </div>
 
-      {/* CTA */}
+      {}
       <div className="new-job-detail__cta-row">
         <button
           className={`new-job-detail__save-btn ${saved ? "new-job-detail__save-btn--saved" : ""}`}
@@ -560,7 +528,7 @@ export const JobDetailPage: React.FC = () => {
   return (
     <div className="home-screen">
 
-      {/* ══════ MOBILE ══════ */}
+      {}
       <div className="home-mobile" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
         <div className="ann-page-topbar">
           <button className="ann-back-btn" onClick={() => navigate(-1)}>
@@ -574,7 +542,7 @@ export const JobDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ══════ DESKTOP ══════ */}
+      {}
       <div className="home-desktop" style={{ flex: 1 }}>
         <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} />
         <div className="home-main">
@@ -587,10 +555,7 @@ export const JobDetailPage: React.FC = () => {
               <p>Full information about the position</p>
             </div>
             <div className="home-topbar__right">
-              {/* <div className="home-topbar__notif">
-                <Bell size={17} color="#1E1B4B" />
-                <div className="home-topbar__notif-dot" />
-              </div> */}
+              {}
             </div>
           </div>
           <div className="home-content" style={{ overflowY: "auto" }}>

@@ -419,15 +419,18 @@ img {
   .resend-row { display: flex; align-items: center; justify-content: space-between; padding: 0 4px; }
   .resend-timer { font-family: var(--font-body); font-size: 12px; color: var(--color-muted); }
 
-  .logo-page {
-    display: flex;
+.logo-page {
+    position: relative;
+    display: flex !important;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    width: 390px;
+    min-height: 844px;
+    background: linear-gradient(160deg, var(--color-bg) 0%, var(--color-bg-to) 100%);
+    border-radius: 52px;
+    overflow: hidden;
   }
-
-  .logo-page__blob,
-  .logo-page__inner { display: none; }
+ 
 }
 
 
@@ -913,13 +916,23 @@ img {
   .logo-page {
     position: relative;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: center;       /* вертикальный центр */
+    justify-content: center;   /* горизонтальный центр */
     min-height: 100vh;
     background: linear-gradient(160deg, var(--color-bg) 0%, var(--color-bg-to) 100%);
     overflow: hidden;
   }
-
+ 
+  .logo-page__inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    animation: logo-fade-in 0.6s ease both;
+  }
+ 
   .logo-page__blob {
     position: absolute;
     border-radius: 50%;
@@ -981,17 +994,6 @@ img {
     display: block;
   }
 
-  .logo-page__wordmark {
-    display: flex;
-    align-items: baseline;
-    opacity: 0;
-    pointer-events: none;
-    position: absolute;
-  }
-
-  .logo-page__uni   { font-family: var(--font-desk); font-weight: 800; font-size: clamp(40px, 6vw, 64px); color: var(--color-primary); letter-spacing: -2px; }
-  .logo-page__verse { font-family: var(--font-desk); font-weight: 800; font-size: clamp(40px, 6vw, 64px); color: var(--color-accent);  letter-spacing: -2px; }
-
   .logo-page__tagline {
     font-family: var(--font-desk);
     font-size: 14px;
@@ -1000,24 +1002,36 @@ img {
     letter-spacing: 0.3px;
     margin-top: 8px;
     margin-bottom: 32px;
+    text-align: center;
     opacity: 0;
-    animation: logo-fade-in 0.6s ease 0.3s both;
+    animation: logo-fade-in 0.6s ease 0.35s both;
   }
 
+  /* Progress bar track */
   .logo-page__bar-track {
     width: clamp(120px, 14vw, 180px);
     height: 3px;
     background: rgba(124, 58, 237, 0.12);
     border-radius: 4px;
     overflow: hidden;
+    opacity: 0;
+    animation: logo-fade-in 0.4s ease 0.55s both;
   }
 
+  /* Progress bar fill */
   .logo-page__bar-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
     border-radius: 4px;
     transition: width 0.03s linear;
   }
+
+
+  
+ 
+
+
+
   .auth-body:not(:has(~ .auth-right)) {
     all: unset;
     display: contents;
@@ -1036,7 +1050,121 @@ img {
 
 
 
+/* ══════════════════════════════════════════════════════════
+   MOBILE SPLASH / LOGO PAGE  (добавить в существующий CSS)
+   Заменяет старые правила .logo-page внутри @media max-width:767px
+   ══════════════════════════════════════════════════════════ */
 
+@media (max-width: 767px) {
+
+  /* Переопределяем старое скрытие — теперь блоки видны */
+  .logo-page__blob,
+  .logo-page__inner {
+    display: block !important; /* было display:none */
+  }
+
+
+  /* На совсем маленьких экранах растягиваем */
+  @media (max-width: 420px) {
+    .logo-page {
+      width: 100vw;
+      min-height: 100dvh;
+      border-radius: 0;
+    }
+  }
+
+  /* ── Фоновые блобы ── */
+  .logo-page__blob {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .logo-page__blob--1 {
+    width: 320px; height: 320px;
+    top: -80px; right: -80px;
+    background: rgba(124, 58, 237, 0.10);
+    animation: mob-blob-drift 8s ease-in-out infinite alternate;
+  }
+
+  .logo-page__blob--2 {
+    width: 260px; height: 260px;
+    bottom: -60px; left: -60px;
+    background: rgba(30, 27, 75, 0.07);
+    animation: mob-blob-drift 10s ease-in-out infinite alternate-reverse;
+  }
+
+  .logo-page__blob--3 {
+    width: 180px; height: 180px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(124, 58, 237, 0.05);
+    animation: mob-blob-pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes mob-blob-drift {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(16px, 16px) scale(1.06); }
+  }
+
+  @keyframes mob-blob-pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1);   opacity: 0.6; }
+    50%       { transform: translate(-50%, -50%) scale(1.35); opacity: 0.25; }
+  }
+
+  @keyframes mob-logo-fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Логотип (картинка) ── */
+  .logo-page__logo {
+    margin-bottom: 20px;
+  }
+
+  .logo-page__img {
+    width: clamp(100px, 36vw, 160px);
+    height: auto;
+    display: block;
+    animation: mob-logo-scale 0.6s cubic-bezier(.34,1.56,.64,1) 0.1s both;
+  }
+
+  @keyframes mob-logo-scale {
+    from { opacity: 0; transform: scale(0.72); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .logo-page__tagline {
+    font-family: var(--font-body, 'Space Grotesk', sans-serif);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-muted, #6B7280);
+    letter-spacing: 0.2px;
+    margin-top: 6px;
+    margin-bottom: 40px;
+    text-align: center;
+    opacity: 0;
+    animation: mob-logo-fade-in 0.6s ease 0.45s both;
+  }
+
+  /* ── Прогресс-бар ── */
+  .logo-page__bar-track {
+    width: 140px;
+    height: 3px;
+    background: rgba(124, 58, 237, 0.14);
+    border-radius: 4px;
+    overflow: hidden;
+    opacity: 0;
+    animation: mob-logo-fade-in 0.4s ease 0.6s both;
+  }
+
+  .logo-page__bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary, #1E1B4B), var(--color-accent, #7C3AED));
+    border-radius: 4px;
+    transition: width 0.03s linear;
+  }
+}
 
 @media (max-width: 767px) {
 

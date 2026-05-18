@@ -76,7 +76,6 @@ const Feed: React.FC<{
   const handleFilter = (f: string) => {
     setActiveFilter(f);
     if (f === "All") {
-      // Scroll back to top
       if (scrollContainerRef?.current) {
         scrollContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
       }
@@ -108,7 +107,6 @@ const Feed: React.FC<{
 
       <div className="home-content">
 
-        {/* ── Announcements ── */}
         <div ref={sectionRefs.Announcements}>
           <SectionHeader
             title="Announcements"
@@ -145,7 +143,6 @@ const Feed: React.FC<{
           </div>
         </div>
 
-        {/* ── Events ── */}
         <div ref={sectionRefs.Events}>
           <SectionHeader
             title="Events"
@@ -199,7 +196,6 @@ const Feed: React.FC<{
           </div>
         </div>
 
-        {/* ── Housing ── */}
         <div ref={sectionRefs.Housing}>
           <SectionHeader
             title="Housing"
@@ -244,7 +240,6 @@ const Feed: React.FC<{
           </div>
         </div>
 
-        {/* ── Jobs ── */}
         <div ref={sectionRefs.Jobs}>
           <SectionHeader
             title="Jobs"
@@ -317,15 +312,12 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeNav,    setActiveNav]    = useState("home");
-
-  // Refs to the scrollable containers so Feed can scroll them
   const mobileScrollRef  = useRef<HTMLDivElement>(null);
   const desktopScrollRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="home-screen">
 
-      {/* ── MOBILE ── */}
       <div
         className="home-mobile"
         style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}
@@ -337,8 +329,6 @@ const HomePage: React.FC = () => {
           </div>
           <div className="home-avatar">AB</div>
         </div>
-
-        {/* Make this div scrollable so scrollIntoView works inside it */}
         <div
           ref={mobileScrollRef}
           style={{ flex: 1, overflowY: "auto" }}
@@ -390,7 +380,6 @@ const HomePage: React.FC = () => {
 </div>
       </div>
 
-      {/* ── DESKTOP ── */}
       <div className="home-desktop" style={{ flex: 1 }}>
         <aside className="home-sidebar">
           <div className="home-sidebar__logo">
@@ -449,7 +438,6 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Scrollable desktop main area */}
           <div
             ref={desktopScrollRef}
             style={{ flex: 1, overflowY: "auto" }}

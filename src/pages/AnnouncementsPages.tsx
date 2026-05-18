@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/static-components */
+
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -7,7 +8,7 @@ import {
   Search, 
 } from "lucide-react";
 
-/* ─── Data ───────────────────────────────────────────────── */
+
 export interface AnnouncementItem {
   id: number;
   category: string;
@@ -98,7 +99,7 @@ export const ANNOUNCEMENTS: AnnouncementItem[] = [
   },
 ];
 
-/* ─── Shared nav items ───────────────────────────────────── */
+
 const navItems = [
   { id: "home",    label: "Home",    icon: <Home size={22} />             },
   { id: "jobs",    label: "Jobs",    icon: <BriefcaseBusiness size={22} /> },
@@ -107,7 +108,7 @@ const navItems = [
   { id: "profile", label: "Profile", icon: <User size={22} />             },
 ];
 
-/* ─── Sidebar (shared desktop) ──────────────────────────── */
+
 const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }> = ({
   activeNav, setActiveNav,
 }) => {
@@ -146,9 +147,7 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   ANNOUNCEMENTS LIST PAGE
-   ════════════════════════════════════════════════════════════ */
+
 export const AnnouncementsPage: React.FC = () => {
   const navigate   = useNavigate();
   const [activeNav, setActiveNav] = useState("home");
@@ -187,9 +186,9 @@ export const AnnouncementsPage: React.FC = () => {
   return (
     <div className="home-screen">
 
-      {/* ══════ MOBILE ══════ */}
+      {}
       <div className="home-mobile" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
-        {/* Top bar */}
+        {}
         <div className="ann-page-topbar">
           <button className="ann-back-btn" onClick={() => navigate(-1)}>
             <ArrowLeft size={18} color="#1E1B4B" strokeWidth={2} />
@@ -198,7 +197,7 @@ export const AnnouncementsPage: React.FC = () => {
           <div style={{ width: 40 }} />
         </div>
 
-        {/* Search */}
+        {}
         <div style={{ padding: "0 16px 12px" }}>
           <div className="ann-search-bar">
             <Search size={15} color="#A09DC5" />
@@ -211,12 +210,12 @@ export const AnnouncementsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* List */}
+        {}
         <div className="home-content" style={{ padding: "0 16px 24px" }}>
           <CardList />
         </div>
 
-        {/* Bottom nav */}
+        {}
         <div className="home-navbar">
           {navItems.map(item => (
             <button key={item.id}
@@ -229,12 +228,12 @@ export const AnnouncementsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ══════ DESKTOP ══════ */}
+      {}
       <div className="home-desktop" style={{ flex: 1 }}>
         <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} />
 
         <div className="home-main">
-          {/* Top bar */}
+          {}
           <div className="home-topbar">
             <div className="home-topbar__greeting">
               <button className="ann-desk-back" onClick={() => navigate(-1)}>
@@ -254,10 +253,7 @@ export const AnnouncementsPage: React.FC = () => {
                   style={{ background: "none", border: "none", outline: "none", fontSize: 13, color: "#1E1B4B", fontFamily: "Manrope, sans-serif", width: "100%" }}
                 />
               </div>
-              {/* <div className="home-topbar__notif">
-                <Bell size={17} color="#1E1B4B" />
-                <div className="home-topbar__notif-dot" />
-              </div> */}
+              {}
             </div>
           </div>
 
@@ -291,9 +287,7 @@ export const AnnouncementsPage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   ANNOUNCEMENT DETAIL PAGE
-   ════════════════════════════════════════════════════════════ */
+
 export const AnnouncementDetailPage: React.FC = () => {
   const navigate       = useNavigate();
   const { id }         = useParams<{ id: string }>();
@@ -304,21 +298,21 @@ export const AnnouncementDetailPage: React.FC = () => {
 
   const DetailContent = () => (
     <div className="ev-detail-body">
-      {/* Category badge */}
+      {}
       <span className="ann-detail-cat">
         <BookOpen size={14} /> {ann.category}
       </span>
 
-      {/* Title + meta */}
+      {}
       <div className="ann-detail-head">
         <h2 className="ann-detail-title">{ann.title}</h2>
         <p className="ann-detail-meta">{ann.organizer} · {ann.date}</p>
       </div>
 
-      {/* Divider */}
+      {}
       <div className="ann-detail-divider" />
 
-      {/* Info chips — 2×2 grid */}
+      {}
       <div className="ann-detail-chips">
         <div className="ann-detail-chip">
           <span className="ann-detail-chip__label">DEADLINE</span>
@@ -338,13 +332,13 @@ export const AnnouncementDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* About */}
+      {}
       <div className="ann-detail-section">
         <h3 className="ann-detail-section__title">About</h3>
         <p className="ann-detail-section__text">{ann.about}</p>
       </div>
 
-      {/* Requirements */}
+      {}
       <div className="ann-detail-section">
         <h3 className="ann-detail-section__title">Requirements</h3>
         <ul className="ann-detail-reqs">
@@ -354,7 +348,7 @@ export const AnnouncementDetailPage: React.FC = () => {
         </ul>
       </div>
 
-      {/* Contact */}
+      {}
       <div className="ann-detail-section">
         <h3 className="ann-detail-section__title">Contact</h3>
         <div className="ann-detail-input-wrap">
@@ -369,7 +363,7 @@ export const AnnouncementDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* CTA */}
+      {}
       <button className="ann-detail-cta">Apply now</button>
     </div>
   );
@@ -377,9 +371,9 @@ export const AnnouncementDetailPage: React.FC = () => {
   return (
     <div className="home-screen">
 
-      {/* ══════ MOBILE ══════ */}
+      {}
       <div className="home-mobile" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
-        {/* Top bar */}
+        {}
         <div className="ann-page-topbar">
           <button className="ann-back-btn" onClick={() => navigate(-1)}>
             <ArrowLeft size={18} color="#1E1B4B" strokeWidth={2} />
@@ -388,18 +382,18 @@ export const AnnouncementDetailPage: React.FC = () => {
           <div style={{ width: 40 }} />
         </div>
 
-        {/* Scrollable content */}
+        {}
         <div className="home-content" style={{ padding: "0 16px 32px" }}>
           <DetailContent />
         </div>
       </div>
 
-      {/* ══════ DESKTOP ══════ */}
+      {}
       <div className="home-desktop" style={{ flex: 1 }}>
         <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} />
 
         <div className="home-main">
-          {/* Top bar */}
+          {}
           <div className="home-topbar">
             <div className="home-topbar__greeting">
               <button className="ann-desk-back" onClick={() => navigate(-1)}>
@@ -409,21 +403,18 @@ export const AnnouncementDetailPage: React.FC = () => {
               <p>Full information about the announcement</p>
             </div>
             <div className="home-topbar__right">
-              {/* <div className="home-topbar__notif">
-                <Bell size={17} color="#1E1B4B" />
-                <div className="home-topbar__notif-dot" />
-              </div> */}
+              {}
             </div>
           </div>
 
-          {/* Two-column on desktop */}
+          {}
           <div className="home-content">
             <div className="ann-detail-desk-layout">
-              {/* Left: detail */}
+              {}
               <div className="ann-detail-desk-main">
                 <DetailContent />
               </div>
-              {/* Right: other announcements */}
+              {}
               <div className="ann-detail-desk-aside">
                 <h3 className="ann-detail-desk-aside__title">Other Announcements</h3>
                 {ANNOUNCEMENTS.filter(a => a.id !== ann.id).map(a => (

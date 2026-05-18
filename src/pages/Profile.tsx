@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/static-components */
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -7,7 +8,6 @@ import {
   Heart, Settings, Lock, Pencil, BookOpen, Clock, X,
 } from "lucide-react";
 
-/* ─── Nav ────────────────────────────────────────────────── */
 const navItems = [
   { id: "home",    label: "Home",    icon: <Home size={22} />              },
   { id: "jobs",    label: "Jobs",    icon: <BriefcaseBusiness size={22} /> },
@@ -16,7 +16,6 @@ const navItems = [
   { id: "profile", label: "Profile", icon: <User size={22} />              },
 ];
 
-/* ─── Sidebar ────────────────────────────────────────────── */
 const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }> = ({
   activeNav, setActiveNav,
 }) => {
@@ -62,9 +61,6 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   PROFILE PAGE
-   ════════════════════════════════════════════════════════════ */
 export const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState("profile");
@@ -87,7 +83,7 @@ export const ProfilePage: React.FC = () => {
 
   const ProfileContent = () => (
     <div className="prof-page-content">
-      {/* Header */}
+      
       <div className="prof-page-header">
         <h1 className="prof-page-header__title">Profile</h1>
         <button className="prof-edit-icon-btn">
@@ -95,7 +91,7 @@ export const ProfilePage: React.FC = () => {
         </button>
       </div>
 
-      {/* User card */}
+      
       <div className="prof-user-card">
         <div className="prof-user-card__top">
           <div className="prof-avatar-lg">A</div>
@@ -126,7 +122,7 @@ export const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* YOUR INTERESTS section */}
+      
       <div className="prof-section">
         <p className="prof-section__label">YOUR INTERESTS</p>
         <div className="prof-menu-group">
@@ -138,7 +134,7 @@ export const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* ACTIVITY section */}
+      
       <div className="prof-section">
         <p className="prof-section__label">ACTIVITY</p>
         <div className="prof-menu-group">
@@ -150,7 +146,7 @@ export const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Log out */}
+      
       <button className="prof-logout-btn" onClick={() => navigate("/login")}>
         Log out
       </button>
@@ -159,7 +155,7 @@ export const ProfilePage: React.FC = () => {
 
   return (
     <div className="home-screen">
-      {/* ══════ MOBILE ══════ */}
+      
       <div className="home-mobile" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
         <div style={{ flex: 1, overflowY: "auto" }}>
           <ProfileContent />
@@ -181,21 +177,11 @@ export const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* ══════ DESKTOP ══════ */}
+      
       <div className="home-desktop" style={{ flex: 1 }}>
         <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} />
         <div className="home-main">
-          {/* <div className="home-topbar">
-            <div className="home-topbar__greeting">
-              <h1>Profile 👤</h1>
-              <p>Shymkent · Student</p>
-            </div>
-            <div className="home-topbar__right">
-              <div className="home-topbar__notif">
-                <Bell size={17} color="#1E1B4B" /><div className="home-topbar__notif-dot" />
-              </div>
-            </div>
-          </div> */}
+          
           <div className="home-content">
             <div className="ann-detail-desk-layout">
               <div className="ann-detail-desk-main" style={{ maxWidth: 520 }}>
@@ -223,9 +209,6 @@ export const ProfilePage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   BASIC INFO PAGE
-   ════════════════════════════════════════════════════════════ */
 export const BasicInfoPage: React.FC = () => {
   const navigate = useNavigate();
 
@@ -266,7 +249,7 @@ export const BasicInfoPage: React.FC = () => {
       </div>
 
       <div style={{ padding: "0 16px 48px", display: "flex", flexDirection: "column", gap: 24 }}>
-        {/* Avatar */}
+        
         <div className="prof-avatar-section">
           <div className="prof-avatar-wrap">
             <div className="prof-avatar-xl">A</div>
@@ -277,7 +260,7 @@ export const BasicInfoPage: React.FC = () => {
           <button className="prof-change-photo-btn">Change photo</button>
         </div>
 
-        {/* Personal info */}
+        
         <div className="prof-form-section">
           <p className="prof-form-section__label">PERSONAL INFO</p>
           <EditableField label="Full Name"    value={fullName} onChange={setFullName} />
@@ -285,7 +268,7 @@ export const BasicInfoPage: React.FC = () => {
           <EditableField label="Phone number" value={phone}    onChange={setPhone}    type="tel" />
         </div>
 
-        {/* Academic info */}
+        
         <div className="prof-form-section">
           <p className="prof-form-section__label">ACADEMIC INFO</p>
           <div className="prof-field">
@@ -337,9 +320,7 @@ export const BasicInfoPage: React.FC = () => {
               <h1 style={{ marginTop: 8 }}>Basic Info</h1>
             </div>
             <div className="home-topbar__right">
-              {/* <div className="home-topbar__notif">
-                <Bell size={17} color="#1E1B4B" /><div className="home-topbar__notif-dot" />
-              </div> */}
+              
             </div>
           </div>
           <div className="home-content">
@@ -351,9 +332,6 @@ export const BasicInfoPage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   MY APPLICATIONS PAGE
-   ════════════════════════════════════════════════════════════ */
 interface Application {
   id: number;
   title: string;
@@ -411,7 +389,7 @@ export const MyApplicationsPage: React.FC = () => {
       </div>
 
       <div style={{ padding: "0 16px 48px", display: "flex", flexDirection: "column", gap: 12 }}>
-        {/* Filters */}
+        
         <div className="prof-app-filters">
           {filters.map(f => {
             const key = filterMap[f] as typeof activeFilter;
@@ -423,7 +401,7 @@ export const MyApplicationsPage: React.FC = () => {
           })}
         </div>
 
-        {/* Application cards */}
+        
         {filtered.map(app => (
           <div key={app.id} className="prof-app-card">
             <div className="prof-app-card__logo" style={{ background: app.logoBg }}>
@@ -440,7 +418,7 @@ export const MyApplicationsPage: React.FC = () => {
           </div>
         ))}
 
-        {/* Upcoming interview banner */}
+        
         <div className="prof-interview-banner">
           <div className="prof-interview-banner__left">
             <p className="prof-interview-banner__eyebrow">UPCOMING INTERVIEW</p>

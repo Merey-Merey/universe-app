@@ -37,11 +37,6 @@ const LogoPage: React.FC = () => {
         <div className="logo-page__logo">
           <img src={logoImg} alt="UniVerse" className="logo-page__img" />
         </div>
-        <div className="logo-page__wordmark" aria-hidden="true">
-          <span className="logo-page__uni">Uni</span>
-          <span className="logo-page__verse">Verse</span>
-        </div>
-
         <p className="logo-page__tagline">A universe of opportunities for students</p>
         <div className="logo-page__bar-track">
           <div

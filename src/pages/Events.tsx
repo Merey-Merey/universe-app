@@ -8,7 +8,6 @@ import {
   ChevronDown, Users, BookOpen,
 } from "lucide-react";
 
-/* ─── Types & Data ───────────────────────────────────────── */
 export interface EventItem {
   id: number;
   day: string;
@@ -64,7 +63,6 @@ const navItems = [
 const monthFilters = ["May", "June", "July", "August"];
 const catFilters   = ["All", "Career", "Startup", "Design", "Free"];
 
-/* ─── Sidebar ────────────────────────────────────────────── */
 const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }> = ({
   activeNav, setActiveNav,
 }) => {
@@ -119,9 +117,7 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   TICKET COMPONENT
-   ════════════════════════════════════════════════════════════ */
+
 const EventTicket: React.FC<{
   event: EventItem; fullName: string; role: string;
   attendance: string; showQR?: boolean;
@@ -179,9 +175,6 @@ const EventTicket: React.FC<{
   </div>
 );
 
-/* ════════════════════════════════════════════════════════════
-   EVENTS LIST PAGE
-   ════════════════════════════════════════════════════════════ */
 export const EventsPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeNav,   setActiveNav]   = useState("events");
@@ -292,21 +285,6 @@ export const EventsPage: React.FC = () => {
     <div className="home-screen">
       <div className="home-mobile" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
         <div style={{ flex: 1, overflowY: "auto" }}><MainContent /></div>
-        {/* <div className="home-navbar">
-          {navItems.map(item => {
-            const isActive = activeNav === item.id;
-            return (
-              <button key={item.id}
-                className={`home-nav-item ${isActive ? "home-nav-item--active" : "home-nav-item--inactive"}`}
-                onClick={() => { setActiveNav(item.id); navigate(item.id === "events" ? "/events" : "/home"); }}>
-                {item.icon}
-                <span className={`home-nav-label ${isActive ? "home-nav-label--show" : "home-nav-label--hide"}`}>
-                  {item.label}
-                </span>
-              </button>
-            );
-          })}
-        </div> */}
           <div className="home-navbar">
   {navItems.map(item => {
     const isActive = activeNav === item.id;
@@ -425,9 +403,7 @@ export const EventsPage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   REGISTER PAGE — 3 steps
-   ════════════════════════════════════════════════════════════ */
+
 export const EventRegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -531,7 +507,6 @@ export const EventRegisterPage: React.FC = () => {
     </div>
   );
 
-  /* Step 1 */
   const Step1 = () => (
     <div className="ev-reg-form">
       <p className="ev-reg-section-label">PERSONAL INFO</p>
@@ -557,7 +532,6 @@ export const EventRegisterPage: React.FC = () => {
     </div>
   );
 
-  /* Step 2 */
   const Step2 = () => (
     <div className="ev-reg-form">
       <p className="ev-reg-section-label">ATTENDANCE</p>
@@ -629,7 +603,6 @@ export const EventRegisterPage: React.FC = () => {
     </div>
   );
 
-  /* Step 3 — Confirm with review cards matching design */
   const Step3 = () => {
     const ReviewRow: React.FC<{label:string;value:string;onEdit:()=>void}> = ({label,value,onEdit}) => (
       <>
@@ -759,9 +732,7 @@ export const EventRegisterPage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   EVENT REGISTERED — success page
-   ════════════════════════════════════════════════════════════ */
+
 export const EventRegisteredPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -770,7 +741,6 @@ export const EventRegisteredPage: React.FC = () => {
 
   const SuccessContent = () => (
     <div className="ev-success-page">
-      {/* Illustration with confetti dots */}
       <div className="ev-success-illustration">
         <span className="ev-conf ev-conf--a" />
         <span className="ev-conf ev-conf--b" />
