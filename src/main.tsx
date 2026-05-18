@@ -3,7 +3,6 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import './home.css'
-
 import LogoPage from "./pages/LogoPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import SignUpPage from "./pages/SignUpPage";
@@ -13,10 +12,11 @@ import {ForgotPasswordPage} from "./pages/ForgotPasswordPage";
 import {VerificationPage} from "./pages/VerificationPage";
 import HomePage from "./pages/HomePage";
 import { AnnouncementDetailPage, AnnouncementsPage } from "./pages/AnnouncementsPages";
-import { EventDetailPage, EventsPage } from "./pages/EventsPages";
 import { JobDetailPage, JobsPage } from "./pages/Jobs";
 import { ApplicationSentPage, JobApplyPage } from "./pages/JobApply";
-import { ContactOwnerPage, HousingDetailPage, HousingPage } from "./pages/Housing";
+import { ContactOwnerPage, HousingDetailPage, HousingFilterPage, HousingPage, HousingResultsPage } from "./pages/Housing";
+import { EventRegisteredPage, EventRegisterPage, EventsPage } from "./pages/Events";
+import { BasicInfoPage, MyApplicationsPage, ProfilePage } from "./pages/Profile";
 
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -32,19 +32,22 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <Route path="/verification" element={<VerificationPage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/announcements" element={<AnnouncementsPage />} />
-<Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
-<Route path="/events" element={<EventsPage />} />
-<Route path="/events/:id" element={<EventDetailPage />} />
-<Route path="/jobs"     element={<JobsPage />} />
-<Route path="/jobs/:id" element={<JobDetailPage />} />
-
-<Route path="/jobs/:id/apply" element={<JobApplyPage />} />
-<Route path="/jobs/:id/sent"  element={<ApplicationSentPage />} />
-<Route path="/housing"            element={<HousingPage />} />
-<Route path="/housing/:id"        element={<HousingDetailPage />} />
-<Route path="/housing/:id/contact" element={<ContactOwnerPage />} />
-
-
+        <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
+        <Route path="/jobs"     element={<JobsPage />} />
+        <Route path="/jobs/:id" element={<JobDetailPage />} />
+        <Route path="/jobs/:id/apply" element={<JobApplyPage />} />
+        <Route path="/jobs/:id/sent"  element={<ApplicationSentPage />} />
+        <Route path="/housing" element={<HousingPage />} />
+        <Route path="/housing/filter" element={<HousingFilterPage />} />
+        <Route path="/housing/results" element={<HousingResultsPage />} />
+        <Route path="/housing/:id" element={<HousingDetailPage />} />
+        <Route path="/housing/:id/contact" element={<ContactOwnerPage />} />
+        <Route path="/events" element={<EventsPage />} />
+        <Route path="/events/:id/register" element={<EventRegisterPage />} />
+        <Route path="/events/:id/success" element={<EventRegisteredPage />} />
+<Route path="/profile" element={<ProfilePage />} />
+<Route path="/profile/basic-info" element={<BasicInfoPage />} />
+<Route path="/profile/applications" element={<MyApplicationsPage />} />
 
       </Routes>
     </BrowserRouter>

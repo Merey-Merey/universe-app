@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+/* eslint-disable react-hooks/refs */
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight, Sparkles, Home, BriefcaseBusiness,
-  User, Calendar, Building2, LogOut,
+  User, Building2, LogOut,
+  Calendar,
 } from "lucide-react";
 
 
@@ -50,7 +52,8 @@ const SectionHeader: React.FC<{
   onSeeAll: () => void;
 }> = ({ title, onSeeAll }) => (
   <div className="home-section-header">
-    <span className="home-section-title">{title}</span> <button className="home-see-all" onClick={onSeeAll}>
+    <span className="home-section-title">{title}</span>
+    <button className="home-see-all" onClick={onSeeAll}>
       See all <ArrowRight size={15} />
     </button>
   </div>
@@ -60,235 +63,273 @@ const Feed: React.FC<{
   activeFilter: string;
   setActiveFilter: (f: string) => void;
   navigate: ReturnType<typeof useNavigate>;
-}> = ({
-  activeFilter,
-  setActiveFilter,
-  navigate,
-}) => (
-  <>
-    <div className="home-filters">
-      {filters.map(f => (
-        <button
-          key={f}
-          className={`home-filter ${
-            activeFilter === f
-              ? "home-filter--active"
-              : "home-filter--inactive"
-          }`}
-          onClick={() => setActiveFilter(f)}
-        >
-          {f}
-        </button>
-      ))}
-    </div>
+  scrollContainerRef?: React.RefObject<HTMLDivElement>;
+}> = ({ activeFilter, setActiveFilter, navigate, scrollContainerRef }) => {
 
-    <div className="home-content">
+  const sectionRefs = {
+    Announcements: useRef<HTMLDivElement>(null),
+    Events:        useRef<HTMLDivElement>(null),
+    Housing:       useRef<HTMLDivElement>(null),
+    Jobs:          useRef<HTMLDivElement>(null),
+  };
 
-      <SectionHeader
-        title="Announcements"
-        onSeeAll={() => navigate("/announcements")}
-      />
+  const handleFilter = (f: string) => {
+    setActiveFilter(f);
+    if (f === "All") {
+      // Scroll back to top
+      if (scrollContainerRef?.current) {
+        scrollContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      return;
+    }
+    const ref = sectionRefs[f as keyof typeof sectionRefs];
+    if (ref?.current) {
+      ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
-      <div className="home-scroll-row">
-        {announcements.map((a, i) => (
-          <div
-            key={i}
-            className="ann-card"
-            onClick={() => navigate(`/announcements/${i + 1}`)}
+  return (
+    <>
+      <div className="home-filters">
+        {filters.map(f => (
+          <button
+            key={f}
+            className={`home-filter ${
+              activeFilter === f
+                ? "home-filter--active"
+                : "home-filter--inactive"
+            }`}
+            onClick={() => handleFilter(f)}
           >
-            <div className="ann-badge">
-              <Sparkles size={13} /> {a.badge}
-            </div>
-
-            <p className="ann-title">{a.title}</p>
-            <p className="ann-meta">{a.meta}</p>
-
-            <div className="ann-chips">
-              <div className="ann-chip">
-                <div className="ann-chip__label">TYPE</div>
-                <div className="ann-chip__value">{a.type}</div>
-              </div>
-
-              <div className="ann-chip">
-                <div className="ann-chip__label">AMOUNT</div>
-                <div className="ann-chip__value">{a.amount}</div>
-              </div>
-            </div>
-          </div>
+            {f}
+          </button>
         ))}
       </div>
 
-      <SectionHeader
-        title="Events"
-        onSeeAll={() => navigate("/events")}
-      />
+      <div className="home-content">
 
-      <div className="home-events-grid">
-        <div
-  className="event-big"
-  onClick={() => navigate("/events/1")}
->
-          <span className="event-date-badge">
-            {events[0].date}
-          </span>
+        {/* ── Announcements ── */}
+        <div ref={sectionRefs.Announcements}>
+          <SectionHeader
+            title="Announcements"
+            onSeeAll={() => navigate("/announcements")}
+          />
 
-          <div className="event-big__title">
-            {events[0].title}
-          </div>
-
-          <div className="event-big__time">
-            {events[0].time}
-          </div>
-
-          <span className="event-free-badge">
-            Free
-          </span>
-        </div>
-
-        <div className="events-small-col">
-          {events.slice(1).map((e, i) => (
-            <div
-  key={i}
-  className="event-small"
-  onClick={() => navigate(`/events/${i + 2}`)}
->
-              <div className="event-small__date">
-                {e.date}
-              </div>
-
-              <div className="event-small__title">
-                {e.title}
-              </div>
-
-              <div className="event-small__meta">
-                {e.time}
-                {e.price ? ` · ${e.price}` : ""}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <SectionHeader
-        title="Housing"
-        onSeeAll={() => navigate("/housing")}
-      />
-
-      <div className="home-list">
-        {housing.map((h, i) => (
-          <div key={i} className="housing-card" onClick={() => navigate(`/housing/${i + 1}`)} >
-            
-            <div className="housing-card__top">
-              <div>
-                <div className="housing-card__name">
-                  {h.name}
-                </div>
-
-                <div className="housing-card__addr">
-                  {h.address}
-                </div>
-              </div>
-
-              <div className="housing-card__price">
-                {h.price}
-                <span>/mo</span>
-              </div>
-            </div>
-
-            <div className="housing-card__chips">
-              {h.chips.map((c, j) => (
-                <span
-                  key={j}
-                  className="h-chip h-chip--muted"
-                >
-                  {c}
-                </span>
-              ))}
-
-              {h.available && (
-                <span className="h-chip h-chip--accent">
-                  Available
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <SectionHeader
-        title="Jobs"
-        onSeeAll={() => navigate("/jobs")}
-      />
-
-      <div className="home-list jobs-grid">
-        {jobs.map((j, i) => (
-          <div
-    key={i}
-    className={`job-card ${j.featured ? "job-card--featured" : "job-card--light"}`}
-    onClick={() => navigate(`/jobs/${i + 1}`)}  // ← добавить это
-  >
-            <div className="job-card__top">
-
+          <div className="home-scroll-row">
+            {announcements.map((a, i) => (
               <div
-                className={`job-card__title ${
-                  j.featured
-                    ? "job-card__title--white"
-                    : "job-card__title--dark"
-                }`}
+                key={i}
+                className="ann-card"
+                onClick={() => navigate(`/announcements/${i + 1}`)}
               >
-                {j.title}
+                <div className="ann-badge">
+                  <Sparkles size={13} /> {a.badge}
+                </div>
+
+                <p className="ann-title">{a.title}</p>
+                <p className="ann-meta">{a.meta}</p>
+
+                <div className="ann-chips">
+                  <div className="ann-chip">
+                    <div className="ann-chip__label">TYPE</div>
+                    <div className="ann-chip__value">{a.type}</div>
+                  </div>
+
+                  <div className="ann-chip">
+                    <div className="ann-chip__label">AMOUNT</div>
+                    <div className="ann-chip__value">{a.amount}</div>
+                  </div>
+                </div>
               </div>
+            ))}
+          </div>
+        </div>
 
-              <span className="job-feat-badge">
-                · Featured
-              </span>
-            </div>
+        {/* ── Events ── */}
+        <div ref={sectionRefs.Events}>
+          <SectionHeader
+            title="Events"
+            onSeeAll={() => navigate("/events")}
+          />
 
+          <div className="home-events-grid">
             <div
-              className={`job-card__company ${
-                j.featured
-                  ? "job-card__company--light"
-                  : "job-card__company--muted"
-              }`}
+              className="event-big"
+              onClick={() => navigate("/events/1")}
             >
-              {j.company}
-            </div>
+              <span className="event-date-badge">
+                {events[0].date}
+              </span>
 
-            <div className="job-card__bottom">
-              <div className="job-chips">
-                {j.tags.map((t, k) => (
-                  <span key={k} className="j-chip">
-                    {t}
-                  </span>
-                ))}
+              <div className="event-big__title">
+                {events[0].title}
               </div>
 
-              <span
-                className={`job-salary ${
-                  j.featured
-                    ? "job-salary--white"
-                    : "job-salary--dark"
-                }`}
-              >
-                {j.salary}
+              <div className="event-big__time">
+                {events[0].time}
+              </div>
+
+              <span className="event-free-badge">
+                Free
               </span>
+            </div>
+
+            <div className="events-small-col">
+              {events.slice(1).map((e, i) => (
+                <div
+                  key={i}
+                  className="event-small"
+                  onClick={() => navigate(`/events/${i + 2}`)}
+                >
+                  <div className="event-small__date">
+                    {e.date}
+                  </div>
+
+                  <div className="event-small__title">
+                    {e.title}
+                  </div>
+
+                  <div className="event-small__meta">
+                    {e.time}
+                    {e.price ? ` · ${e.price}` : ""}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
+        </div>
 
-    </div>
-  </>
-);
+        {/* ── Housing ── */}
+        <div ref={sectionRefs.Housing}>
+          <SectionHeader
+            title="Housing"
+            onSeeAll={() => navigate("/housing")}
+          />
+
+          <div className="home-list">
+            {housing.map((h, i) => (
+              <div key={i} className="housing-card" onClick={() => navigate(`/housing/${i + 1}`)}>
+                <div className="housing-card__top">
+                  <div>
+                    <div className="housing-card__name">
+                      {h.name}
+                    </div>
+
+                    <div className="housing-card__addr">
+                      {h.address}
+                    </div>
+                  </div>
+
+                  <div className="housing-card__price">
+                    {h.price}
+                    <span>/mo</span>
+                  </div>
+                </div>
+
+                <div className="housing-card__chips">
+                  {h.chips.map((c, j) => (
+                    <span key={j} className="h-chip h-chip--muted">
+                      {c}
+                    </span>
+                  ))}
+
+                  {h.available && (
+                    <span className="h-chip h-chip--accent">
+                      Available
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Jobs ── */}
+        <div ref={sectionRefs.Jobs}>
+          <SectionHeader
+            title="Jobs"
+            onSeeAll={() => navigate("/jobs")}
+          />
+
+          <div className="home-list jobs-grid">
+            {jobs.map((j, i) => (
+              <div
+                key={i}
+                className={`job-card ${j.featured ? "job-card--featured" : "job-card--light"}`}
+                onClick={() => navigate(`/jobs/${i + 1}`)}
+              >
+                <div className="job-card__top">
+                  <div
+                    className={`job-card__title ${
+                      j.featured
+                        ? "job-card__title--white"
+                        : "job-card__title--dark"
+                    }`}
+                  >
+                    {j.title}
+                  </div>
+
+                  <span className="job-feat-badge">
+                    · Featured
+                  </span>
+                </div>
+
+                <div
+                  className={`job-card__company ${
+                    j.featured
+                      ? "job-card__company--light"
+                      : "job-card__company--muted"
+                  }`}
+                >
+                  {j.company}
+                </div>
+
+                <div className="job-card__bottom">
+                  <div className="job-chips">
+                    {j.tags.map((t, k) => (
+                      <span key={k} className="j-chip">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+
+                  <span
+                    className={`job-salary ${
+                      j.featured
+                        ? "job-salary--white"
+                        : "job-salary--dark"
+                    }`}
+                  >
+                    {j.salary}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </>
+  );
+};
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeNav,    setActiveNav]    = useState("home");
 
+  // Refs to the scrollable containers so Feed can scroll them
+  const mobileScrollRef  = useRef<HTMLDivElement>(null);
+  const desktopScrollRef = useRef<HTMLDivElement>(null);
+
   return (
     <div className="home-screen">
-      <div className="home-mobile" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
+
+      {/* ── MOBILE ── */}
+      <div
+        className="home-mobile"
+        style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}
+      >
         <div className="home-header">
           <div>
             <h1 className="home-header__name">Aymakhan Balausa</h1>
@@ -296,21 +337,60 @@ const HomePage: React.FC = () => {
           </div>
           <div className="home-avatar">AB</div>
         </div>
-<Feed
-  activeFilter={activeFilter}
-  setActiveFilter={setActiveFilter}
-  navigate={navigate}
-/>        <div className="home-navbar">
-          {navItems.map(item => (
-            <button key={item.id}
-              className={`home-nav-item ${activeNav === item.id ? "home-nav-item--active" : "home-nav-item--inactive"}`}
-              onClick={() => setActiveNav(item.id)}>
-              {item.icon}
-              {item.id === "home" && <span>Home</span>}
-            </button>
-          ))}
+
+        {/* Make this div scrollable so scrollIntoView works inside it */}
+        <div
+          ref={mobileScrollRef}
+          style={{ flex: 1, overflowY: "auto" }}
+        >
+          <Feed
+            activeFilter={activeFilter}
+            setActiveFilter={setActiveFilter}
+            navigate={navigate}
+            scrollContainerRef={mobileScrollRef as React.RefObject<HTMLDivElement>}
+          />
         </div>
+
+       <div className="home-navbar">
+  {navItems.map(item => {
+    const isActive = activeNav === item.id;
+
+    return (
+      <button
+        key={item.id}
+        className={`home-nav-item ${
+          isActive
+            ? "home-nav-item--active"
+            : "home-nav-item--inactive"
+        }`}
+        onClick={() => {
+          setActiveNav(item.id);
+
+          if (item.id === "home") navigate("/home");
+          if (item.id === "jobs") navigate("/jobs");
+          if (item.id === "housing") navigate("/housing");
+          if (item.id === "events") navigate("/events");
+          if (item.id === "profile") navigate("/profile");
+        }}
+      >
+        {item.icon}
+
+        <span
+          className={`home-nav-label ${
+            isActive
+              ? "home-nav-label--show"
+              : "home-nav-label--hide"
+          }`}
+        >
+          {item.label}
+        </span>
+      </button>
+    );
+  })}
+</div>
       </div>
+
+      {/* ── DESKTOP ── */}
       <div className="home-desktop" style={{ flex: 1 }}>
         <aside className="home-sidebar">
           <div className="home-sidebar__logo">
@@ -319,16 +399,31 @@ const HomePage: React.FC = () => {
           </div>
 
           <nav className="home-sidebar__nav">
-            {navItems.map(item => (
-              <button key={item.id}
-                className={`home-sidebar__item ${activeNav === item.id ? "home-sidebar__item--active" : ""}`}
-                onClick={() => setActiveNav(item.id)}>
-                {item.icon}
-                {item.label}
-                {item.id === "home" && <span className="home-sidebar__item-badge">3</span>}
-              </button>
-            ))}
-          </nav>
+  {navItems.map(item => (
+    <button
+      key={item.id}
+      className={`home-sidebar__item ${
+        activeNav === item.id ? "home-sidebar__item--active" : ""
+      }`}
+      onClick={() => {
+        setActiveNav(item.id);
+
+        if (item.id === "home") navigate("/home");
+        if (item.id === "jobs") navigate("/jobs");
+        if (item.id === "housing") navigate("/housing");
+        if (item.id === "events") navigate("/events");
+        if (item.id === "profile") navigate("/profile");
+      }}
+    >
+      {item.icon}
+      {item.label}
+
+      {item.id === "home" && (
+        <span className="home-sidebar__item-badge">3</span>
+      )}
+    </button>
+  ))}
+</nav>
 
           <div className="home-sidebar__bottom">
             <div className="home-sidebar__user">
@@ -352,23 +447,21 @@ const HomePage: React.FC = () => {
               <h1>Good morning, Aymakhan 👋</h1>
               <p>Shymkent · Monday, May 6</p>
             </div>
-            {/* <div className="home-topbar__right">
-              <div className="home-topbar__search">
-                <Search size={15} color="#A09DC5" />
-                Search jobs, events, housing...
-              </div>
-              <div className="home-topbar__notif">
-                <Bell size={17} color="#1E1B4B" />
-                <div className="home-topbar__notif-dot" />
-              </div>
-            </div> */}
           </div>
 
-<Feed
-  activeFilter={activeFilter}
-  setActiveFilter={setActiveFilter}
-  navigate={navigate}
-/>        </div>
+          {/* Scrollable desktop main area */}
+          <div
+            ref={desktopScrollRef}
+            style={{ flex: 1, overflowY: "auto" }}
+          >
+            <Feed
+              activeFilter={activeFilter}
+              setActiveFilter={setActiveFilter}
+              navigate={navigate}
+              scrollContainerRef={desktopScrollRef as React.RefObject<HTMLDivElement>}
+            />
+          </div>
+        </div>
       </div>
 
     </div>

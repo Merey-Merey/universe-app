@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, BookOpen,
   Home, BriefcaseBusiness, Building2, Calendar, User, LogOut,
-  Search, Bell,
+  Search, 
 } from "lucide-react";
 
 /* ─── Data ───────────────────────────────────────────────── */
@@ -254,10 +254,10 @@ export const AnnouncementsPage: React.FC = () => {
                   style={{ background: "none", border: "none", outline: "none", fontSize: 13, color: "#1E1B4B", fontFamily: "Manrope, sans-serif", width: "100%" }}
                 />
               </div>
-              <div className="home-topbar__notif">
+              {/* <div className="home-topbar__notif">
                 <Bell size={17} color="#1E1B4B" />
                 <div className="home-topbar__notif-dot" />
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -409,10 +409,10 @@ export const AnnouncementDetailPage: React.FC = () => {
               <p>Full information about the announcement</p>
             </div>
             <div className="home-topbar__right">
-              <div className="home-topbar__notif">
+              {/* <div className="home-topbar__notif">
                 <Bell size={17} color="#1E1B4B" />
                 <div className="home-topbar__notif-dot" />
-              </div>
+              </div> */}
             </div>
           </div>
 
