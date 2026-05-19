@@ -16,7 +16,7 @@ import { JobDetailPage, JobsPage } from "./pages/Jobs";
 import { ApplicationSentPage, JobApplyPage } from "./pages/JobApply";
 import { ContactOwnerPage, HousingDetailPage, HousingFilterPage, HousingPage, HousingResultsPage } from "./pages/Housing";
 import { EventRegisteredPage, EventRegisterPage, EventsPage } from "./pages/Events";
-import { BasicInfoPage, MyApplicationsPage, ProfilePage } from "./pages/Profile";
+import { BasicInfoPage, MyApplicationsPage, NotificationsPage, PrivacySecurityPage, ProfilePage, SavedPage, SettingsPage } from "./pages/Profile";
 
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -48,6 +48,12 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/basic-info" element={<BasicInfoPage />} />
         <Route path="/profile/applications" element={<MyApplicationsPage />} />
+        <Route path="/profile/notifications" element={<NotificationsPage />} />
+        <Route path="/profile/privacy" element={<PrivacySecurityPage />} />
+        <Route path="/profile/saved" element={<SavedPage />} />
+        <Route path="/profile/settings" element={<SettingsPage />} />
+
+
 
       </Routes>
     </BrowserRouter>
