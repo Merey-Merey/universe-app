@@ -125,7 +125,7 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
             className={`home-sidebar__item ${activeNav === item.id ? "home-sidebar__item--active" : ""}`}
             onClick={() => { setActiveNav(item.id); navigate("/home"); }}>
             {item.icon}{item.label}
-            {item.id === "home" && <span className="home-sidebar__item-badge">3</span>}
+            {/* {item.id === "home" && <span className="home-sidebar__item-badge">3</span>} */}
           </button>
         ))}
       </nav>

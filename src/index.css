@@ -7029,3 +7029,10 @@ img {
 @media (max-width: 900px) {
   .ann-detail-desk-aside { display: none; }
 }
+
+.prof-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 999px;
+}

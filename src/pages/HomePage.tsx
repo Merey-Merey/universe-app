@@ -3,9 +3,10 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight, Sparkles, Home, BriefcaseBusiness,
-  User, Building2, LogOut,
-  Calendar,
+  User, Building2, LogOut, Calendar,
 } from "lucide-react";
+import { useUser } from "../context/UserContext";
+            import { Link } from "react-router-dom";
 
 
 interface Announcement { badge: string; title: string; meta: string; type: string; amount: string; }
@@ -14,14 +15,14 @@ interface Housing      { name: string; address: string; price: string; chips: st
 interface Job          { title: string; company: string; tags: string[]; salary: string; featured: boolean; }
 
 const announcements: Announcement[] = [
-  { badge: "New", title: "Scholarship program open for applications",     meta: "Deadline: May 20 · SKSU",          type: "Academic",  amount: "₸500,000"   },
-  { badge: "New", title: "Free English courses for students of UniVerse", meta: "Deadline: May 25 · UniVerse Hub",  type: "Language",  amount: "Free"       },
-  { badge: "New", title: "Student dormitory registration open",           meta: "Deadline: May 15 · SKSU Admin",   type: "Housing",   amount: "₸15,000/mo" },
-  { badge: "New", title: "Career counseling sessions available",          meta: "Deadline: Ongoing · Career Center",type: "Career",   amount: "Free"       },
+  { badge: "New", title: "Scholarship program open for applications",     meta: "Deadline: May 20 · SKSU",           type: "Academic",  amount: "₸500,000"   },
+  { badge: "New", title: "Free English courses for students of UniVerse", meta: "Deadline: May 25 · UniVerse Hub",   type: "Language",  amount: "Free"       },
+  { badge: "New", title: "Student dormitory registration open",           meta: "Deadline: May 15 · SKSU Admin",    type: "Housing",   amount: "₸15,000/mo" },
+  { badge: "New", title: "Career counseling sessions available",          meta: "Deadline: Ongoing · Career Center", type: "Career",    amount: "Free"       },
 ];
 
 const events: Event[] = [
-  { date: "MAY 12", title: "Tech Career Fair",           time: "10:00 AM"              },
+  { date: "MAY 12", title: "Tech Career Fair",           time: "10:00 AM"               },
   { date: "MAY 23", title: "UI/UX Design Workshop",      time: "2:00 PM · Online · Zoom" },
   { date: "MAY 28", title: "Student Networking Evening", time: "7:00 PM", price: "₸1,000" },
 ];
@@ -40,17 +41,26 @@ const jobs: Job[] = [
 
 const filters  = ["All", "Announcements", "Events", "Housing", "Jobs"];
 const navItems = [
-  { id: "home",    label: "Home",    icon: <Home size={22} />            },
-  { id: "jobs",    label: "Jobs",    icon: <BriefcaseBusiness size={22} />},
-  { id: "housing", label: "Housing", icon: <Building2 size={22} />       },
-  { id: "events",  label: "Events",  icon: <Calendar size={22} />        },
-  { id: "profile", label: "Profile", icon: <User size={22} />            },
+  { id: "home",    label: "Home",    icon: <Home size={22} />              },
+  { id: "jobs",    label: "Jobs",    icon: <BriefcaseBusiness size={22} /> },
+  { id: "housing", label: "Housing", icon: <Building2 size={22} />         },
+  { id: "events",  label: "Events",  icon: <Calendar size={22} />          },
+  { id: "profile", label: "Profile", icon: <User size={22} />              },
 ];
 
-const SectionHeader: React.FC<{
-  title: string;
-  onSeeAll: () => void;
-}> = ({ title, onSeeAll }) => (
+/** Возвращает "Good morning / afternoon / evening" по текущему часу */
+const getGreeting = () => {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
+};
+
+/** Форматирует текущую дату: "Monday, May 20" */
+const getTodayLabel = () =>
+  new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+
+const SectionHeader: React.FC<{ title: string; onSeeAll: () => void }> = ({ title, onSeeAll }) => (
   <div className="home-section-header">
     <span className="home-section-title">{title}</span>
     <button className="home-see-all" onClick={onSeeAll}>
@@ -76,63 +86,38 @@ const Feed: React.FC<{
   const handleFilter = (f: string) => {
     setActiveFilter(f);
     if (f === "All") {
-      if (scrollContainerRef?.current) {
-        scrollContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-      }
+      scrollContainerRef?.current?.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    const ref = sectionRefs[f as keyof typeof sectionRefs];
-    if (ref?.current) {
-      ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    sectionRefs[f as keyof typeof sectionRefs]?.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
     <>
       <div className="home-filters">
         {filters.map(f => (
-          <button
-            key={f}
-            className={`home-filter ${
-              activeFilter === f
-                ? "home-filter--active"
-                : "home-filter--inactive"
-            }`}
-            onClick={() => handleFilter(f)}
-          >
+          <button key={f}
+            className={`home-filter ${activeFilter === f ? "home-filter--active" : "home-filter--inactive"}`}
+            onClick={() => handleFilter(f)}>
             {f}
           </button>
         ))}
       </div>
 
       <div className="home-content">
-
         <div ref={sectionRefs.Announcements}>
-          <SectionHeader
-            title="Announcements"
-            onSeeAll={() => navigate("/announcements")}
-          />
-
+          <SectionHeader title="Announcements" onSeeAll={() => navigate("/announcements")} />
           <div className="home-scroll-row">
             {announcements.map((a, i) => (
-              <div
-                key={i}
-                className="ann-card"
-                onClick={() => navigate(`/announcements/${i + 1}`)}
-              >
-                <div className="ann-badge">
-                  <Sparkles size={13} /> {a.badge}
-                </div>
-
+              <div key={i} className="ann-card" onClick={() => navigate(`/announcements/${i + 1}`)}>
+                <div className="ann-badge"><Sparkles size={13} /> {a.badge}</div>
                 <p className="ann-title">{a.title}</p>
                 <p className="ann-meta">{a.meta}</p>
-
                 <div className="ann-chips">
                   <div className="ann-chip">
                     <div className="ann-chip__label">TYPE</div>
                     <div className="ann-chip__value">{a.type}</div>
                   </div>
-
                   <div className="ann-chip">
                     <div className="ann-chip__label">AMOUNT</div>
                     <div className="ann-chip__value">{a.amount}</div>
@@ -144,52 +129,20 @@ const Feed: React.FC<{
         </div>
 
         <div ref={sectionRefs.Events}>
-          <SectionHeader
-            title="Events"
-            onSeeAll={() => navigate("/events")}
-          />
-
+          <SectionHeader title="Events" onSeeAll={() => navigate("/events")} />
           <div className="home-events-grid">
-            <div
-              className="event-big"
-              onClick={() => navigate("/events/1")}
-            >
-              <span className="event-date-badge">
-                {events[0].date}
-              </span>
-
-              <div className="event-big__title">
-                {events[0].title}
-              </div>
-
-              <div className="event-big__time">
-                {events[0].time}
-              </div>
-
-              <span className="event-free-badge">
-                Free
-              </span>
+            <div className="event-big" onClick={() => navigate("/events/:id/register")}>
+              <span className="event-date-badge">{events[0].date}</span>
+              <div className="event-big__title">{events[0].title}</div>
+              <div className="event-big__time">{events[0].time}</div>
+              <span className="event-free-badge">Free</span>
             </div>
-
             <div className="events-small-col">
               {events.slice(1).map((e, i) => (
-                <div
-                  key={i}
-                  className="event-small"
-                  onClick={() => navigate(`/events/${i + 2}`)}
-                >
-                  <div className="event-small__date">
-                    {e.date}
-                  </div>
-
-                  <div className="event-small__title">
-                    {e.title}
-                  </div>
-
-                  <div className="event-small__meta">
-                    {e.time}
-                    {e.price ? ` · ${e.price}` : ""}
-                  </div>
+                <div key={i} className="event-small" onClick={() => navigate(`/events/${i + 2}/register`)}>
+                  <div className="event-small__date">{e.date}</div>
+                  <div className="event-small__title">{e.title}</div>
+                  <div className="event-small__meta">{e.time}{e.price ? ` · ${e.price}` : ""}</div>
                 </div>
               ))}
             </div>
@@ -197,43 +150,20 @@ const Feed: React.FC<{
         </div>
 
         <div ref={sectionRefs.Housing}>
-          <SectionHeader
-            title="Housing"
-            onSeeAll={() => navigate("/housing")}
-          />
-
+          <SectionHeader title="Housing" onSeeAll={() => navigate("/housing")} />
           <div className="home-list">
             {housing.map((h, i) => (
               <div key={i} className="housing-card" onClick={() => navigate(`/housing/${i + 1}`)}>
                 <div className="housing-card__top">
                   <div>
-                    <div className="housing-card__name">
-                      {h.name}
-                    </div>
-
-                    <div className="housing-card__addr">
-                      {h.address}
-                    </div>
+                    <div className="housing-card__name">{h.name}</div>
+                    <div className="housing-card__addr">{h.address}</div>
                   </div>
-
-                  <div className="housing-card__price">
-                    {h.price}
-                    <span>/mo</span>
-                  </div>
+                  <div className="housing-card__price">{h.price}<span>/mo</span></div>
                 </div>
-
                 <div className="housing-card__chips">
-                  {h.chips.map((c, j) => (
-                    <span key={j} className="h-chip h-chip--muted">
-                      {c}
-                    </span>
-                  ))}
-
-                  {h.available && (
-                    <span className="h-chip h-chip--accent">
-                      Available
-                    </span>
-                  )}
+                  {h.chips.map((c, j) => <span key={j} className="h-chip h-chip--muted">{c}</span>)}
+                  {h.available && <span className="h-chip h-chip--accent">Available</span>}
                 </div>
               </div>
             ))}
@@ -241,60 +171,26 @@ const Feed: React.FC<{
         </div>
 
         <div ref={sectionRefs.Jobs}>
-          <SectionHeader
-            title="Jobs"
-            onSeeAll={() => navigate("/jobs")}
-          />
-
+          <SectionHeader title="Jobs" onSeeAll={() => navigate("/jobs")} />
           <div className="home-list jobs-grid">
             {jobs.map((j, i) => (
-              <div
-                key={i}
+              <div key={i}
                 className={`job-card ${j.featured ? "job-card--featured" : "job-card--light"}`}
-                onClick={() => navigate(`/jobs/${i + 1}`)}
-              >
+                onClick={() => navigate(`/jobs/${i + 1}`)}>
                 <div className="job-card__top">
-                  <div
-                    className={`job-card__title ${
-                      j.featured
-                        ? "job-card__title--white"
-                        : "job-card__title--dark"
-                    }`}
-                  >
+                  <div className={`job-card__title ${j.featured ? "job-card__title--white" : "job-card__title--dark"}`}>
                     {j.title}
                   </div>
-
-                  <span className="job-feat-badge">
-                    · Featured
-                  </span>
+                  <span className="job-feat-badge">· Featured</span>
                 </div>
-
-                <div
-                  className={`job-card__company ${
-                    j.featured
-                      ? "job-card__company--light"
-                      : "job-card__company--muted"
-                  }`}
-                >
+                <div className={`job-card__company ${j.featured ? "job-card__company--light" : "job-card__company--muted"}`}>
                   {j.company}
                 </div>
-
                 <div className="job-card__bottom">
                   <div className="job-chips">
-                    {j.tags.map((t, k) => (
-                      <span key={k} className="j-chip">
-                        {t}
-                      </span>
-                    ))}
+                    {j.tags.map((t, k) => <span key={k} className="j-chip">{t}</span>)}
                   </div>
-
-                  <span
-                    className={`job-salary ${
-                      j.featured
-                        ? "job-salary--white"
-                        : "job-salary--dark"
-                    }`}
-                  >
+                  <span className={`job-salary ${j.featured ? "job-salary--white" : "job-salary--dark"}`}>
                     {j.salary}
                   </span>
                 </div>
@@ -302,7 +198,6 @@ const Feed: React.FC<{
             ))}
           </div>
         </div>
-
       </div>
     </>
   );
@@ -310,76 +205,60 @@ const Feed: React.FC<{
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeNav,    setActiveNav]    = useState("home");
   const mobileScrollRef  = useRef<HTMLDivElement>(null);
   const desktopScrollRef = useRef<HTMLDivElement>(null);
 
+  const greeting  = getGreeting();
+  const todayLabel = getTodayLabel();
+  // "Shymkent · Monday, May 20"  или просто дата если город не указан
+  const headerMeta = user.city ? `${user.city} · ${todayLabel}` : todayLabel;
+  // первое слово имени для приветствия
+  const firstName = user.fullName.trim().split(/\s+/)[0];
+
   return (
     <div className="home-screen">
-
-      <div
-        className="home-mobile"
-        style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}
-      >
+      {/* MOBILE */}
+      <div className="home-mobile" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
         <div className="home-header">
           <div>
-            <h1 className="home-header__name">Aymakhan Balausa</h1>
-            <p className="home-header__meta">Shymkent · May 6</p>
+            <h1 className="home-header__name">{user.fullName || "Welcome"}</h1>
+            <p className="home-header__meta">{headerMeta}</p>
           </div>
-          <div className="home-avatar">AB</div>
-        </div>
-        <div
-          ref={mobileScrollRef}
-          style={{ flex: 1, overflowY: "auto" }}
-        >
-          <Feed
-            activeFilter={activeFilter}
-            setActiveFilter={setActiveFilter}
-            navigate={navigate}
-            scrollContainerRef={mobileScrollRef as React.RefObject<HTMLDivElement>}
-          />
+          {user.initials
+            ? <div className="home-avatar">{user.initials}</div>
+            : <div className="home-avatar"><User size={20} /></div>
+          }
         </div>
 
-       <div className="home-navbar">
-  {navItems.map(item => {
-    const isActive = activeNav === item.id;
+        <div ref={mobileScrollRef} style={{ flex: 1, overflowY: "auto" }}>
+          <Feed activeFilter={activeFilter} setActiveFilter={setActiveFilter}
+            navigate={navigate} scrollContainerRef={mobileScrollRef as React.RefObject<HTMLDivElement>} />
+        </div>
 
-    return (
-      <button
-        key={item.id}
-        className={`home-nav-item ${
-          isActive
-            ? "home-nav-item--active"
-            : "home-nav-item--inactive"
-        }`}
-        onClick={() => {
-          setActiveNav(item.id);
-
-          if (item.id === "home") navigate("/home");
-          if (item.id === "jobs") navigate("/jobs");
-          if (item.id === "housing") navigate("/housing");
-          if (item.id === "events") navigate("/events");
-          if (item.id === "profile") navigate("/profile");
-        }}
-      >
-        {item.icon}
-
-        <span
-          className={`home-nav-label ${
-            isActive
-              ? "home-nav-label--show"
-              : "home-nav-label--hide"
-          }`}
-        >
-          {item.label}
-        </span>
-      </button>
-    );
-  })}
-</div>
+        <div className="home-navbar">
+          {navItems.map(item => {
+            const isActive = activeNav === item.id;
+            return (
+              <button key={item.id}
+                className={`home-nav-item ${isActive ? "home-nav-item--active" : "home-nav-item--inactive"}`}
+                onClick={() => {
+                  setActiveNav(item.id);
+                  navigate(item.id === "home" ? "/home" : `/${item.id}`);
+                }}>
+                {item.icon}
+                <span className={`home-nav-label ${isActive ? "home-nav-label--show" : "home-nav-label--hide"}`}>
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
+      {/* DESKTOP */}
       <div className="home-desktop" style={{ flex: 1 }}>
         <aside className="home-sidebar">
           <div className="home-sidebar__logo">
@@ -388,40 +267,37 @@ const HomePage: React.FC = () => {
           </div>
 
           <nav className="home-sidebar__nav">
-  {navItems.map(item => (
-    <button
-      key={item.id}
-      className={`home-sidebar__item ${
-        activeNav === item.id ? "home-sidebar__item--active" : ""
-      }`}
-      onClick={() => {
-        setActiveNav(item.id);
-
-        if (item.id === "home") navigate("/home");
-        if (item.id === "jobs") navigate("/jobs");
-        if (item.id === "housing") navigate("/housing");
-        if (item.id === "events") navigate("/events");
-        if (item.id === "profile") navigate("/profile");
-      }}
-    >
-      {item.icon}
-      {item.label}
-
-      {item.id === "home" && (
-        <span className="home-sidebar__item-badge">3</span>
-      )}
-    </button>
-  ))}
-</nav>
+            {navItems.map(item => (
+              <button key={item.id}
+                className={`home-sidebar__item ${activeNav === item.id ? "home-sidebar__item--active" : ""}`}
+                onClick={() => {
+                  setActiveNav(item.id);
+                  navigate(item.id === "home" ? "/home" : `/${item.id}`);
+                }}>
+                {item.icon}
+                {item.label}
+                {/* {item.id === "home" && <span className="home-sidebar__item-badge">3</span>} */}
+              </button>
+            ))}
+          </nav>
 
           <div className="home-sidebar__bottom">
-            <div className="home-sidebar__user">
-              <div className="home-sidebar__avatar">AB</div>
-              <div>
-                <div className="home-sidebar__user-name">Aymakhan Balausa</div>
-                <div className="home-sidebar__user-meta">Shymkent · Student</div>
-              </div>
-            </div>
+
+<Link to="/profile" className="home-sidebar__user">
+  <div className="home-sidebar__avatar">
+    {user.initials || <User size={18} />}
+  </div>
+
+  <div>
+    <div className="home-sidebar__user-name">
+      {user.fullName || "—"}
+    </div>
+
+    <div className="home-sidebar__user-meta">
+      {[user.city, user.role].filter(Boolean).join(" · ") || "Student"}
+    </div>
+  </div>
+</Link>
             <button className="home-sidebar__item"
               style={{ marginTop: 4, color: "rgba(255,255,255,0.4)" }}
               onClick={() => navigate("/login")}>
@@ -433,25 +309,17 @@ const HomePage: React.FC = () => {
         <div className="home-main">
           <div className="home-topbar">
             <div className="home-topbar__greeting">
-              <h1>Good morning, Aymakhan 👋</h1>
-              <p>Shymkent · Monday, May 6</p>
+              <h1>{firstName ? `${greeting}, ${firstName} 👋` : `${greeting} 👋`}</h1>
+              <p>{headerMeta}</p>
             </div>
           </div>
 
-          <div
-            ref={desktopScrollRef}
-            style={{ flex: 1, overflowY: "auto" }}
-          >
-            <Feed
-              activeFilter={activeFilter}
-              setActiveFilter={setActiveFilter}
-              navigate={navigate}
-              scrollContainerRef={desktopScrollRef as React.RefObject<HTMLDivElement>}
-            />
+          <div ref={desktopScrollRef} style={{ flex: 1, overflowY: "auto" }}>
+            <Feed activeFilter={activeFilter} setActiveFilter={setActiveFilter}
+              navigate={navigate} scrollContainerRef={desktopScrollRef as React.RefObject<HTMLDivElement>} />
           </div>
         </div>
       </div>
-
     </div>
   );
 };

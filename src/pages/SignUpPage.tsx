@@ -5,15 +5,18 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { validate } from "../utils/validation";
 import { formatKzPhone, isKzPhoneComplete } from "../utils/phoneFormat";
 import ErrorMsg from "../components/ErrorMsg";
+import { useUser, getInitials, getAvatarLetter } from "../context/UserContext";
 
 const fieldBorder = (err: string): React.CSSProperties =>
   err ? { border: "1.5px solid #EF4444", borderRadius: 12 } : {};
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
+  const { setUser } = useUser();
   const [form, setForm]       = useState({ name: "", email: "", phone: "+7 (" });
   const [errors, setErrors]   = useState({ name: "", email: "", phone: "" });
   const [touched, setTouched] = useState({ name: false, email: false, phone: false });
+
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatKzPhone(e.target.value);
     setForm(f => ({ ...f, phone: formatted }));
@@ -70,6 +73,17 @@ const SignUpPage: React.FC = () => {
     setErrors(e);
     setTouched({ name: true, email: true, phone: true });
     if (Object.values(e).some(Boolean)) return;
+
+    // Сохраняем введённые данные в контекст
+    setUser(u => ({
+      ...u,
+      fullName:     form.name.trim(),
+      email:        form.email.trim(),
+      phone:        form.phone,
+      initials:     getInitials(form.name),
+      avatarLetter: getAvatarLetter(form.name),
+    }));
+
     navigate("/verification");
   };
 
@@ -145,181 +159,100 @@ const SignUpPage: React.FC = () => {
         </div>
       </div>
 
-<div className="auth-page desktop-only">
-  <div className="auth-left">
-    <div className="auth-left__top">
-      <div className="auth-tag">New here?</div>
-
-      <h1 className="auth-h1">
-        Start your
-        <br />
-        <em>student journey.</em>
-      </h1>
-
-      <p className="auth-desc">
-        Join 50,000+ students who found jobs, housing, and friends through UniVerse.
-        Registration takes only 60 seconds.
-      </p>
-
-      <div className="auth-bullets">
-        <div className="auth-bullet">
-          <div className="auth-bullet__dot" />
-          Free for all students
+      <div className="auth-page desktop-only">
+        <div className="auth-left">
+          <div className="auth-left__top">
+            <div className="auth-tag">New here?</div>
+            <h1 className="auth-h1">
+              Start your<br /><em>student journey.</em>
+            </h1>
+            <p className="auth-desc">
+              Join 50,000+ students who found jobs, housing, and friends through UniVerse.
+              Registration takes only 60 seconds.
+            </p>
+            <div className="auth-bullets">
+              <div className="auth-bullet"><div className="auth-bullet__dot" />Free for all students</div>
+              <div className="auth-bullet"><div className="auth-bullet__dot" />No spam — we promise</div>
+              <div className="auth-bullet"><div className="auth-bullet__dot" />Delete your account anytime</div>
+            </div>
+          </div>
+          <div className="auth-left__footer">
+            <div className="auth-stat">
+              <div className="auth-stat__num">60 sec</div>
+              <div className="auth-stat__label">Registration Time</div>
+            </div>
+            <div className="auth-stat">
+              <div className="auth-stat__num">100%</div>
+              <div className="auth-stat__label">Free</div>
+            </div>
+          </div>
         </div>
 
-        <div className="auth-bullet">
-          <div className="auth-bullet__dot" />
-          No spam — we promise
+        <div className="auth-right">
+          <div className="form-card">
+            <button className="form-back" onClick={() => navigate("/login")}>
+              <ArrowLeft size={14} strokeWidth={2} /> Back to Login
+            </button>
+            <h2 className="form-card__title">Create Account</h2>
+            <p className="form-card__subtitle">Fill in your details to register.</p>
+
+            <div className="field-group">
+              <label className="field-label">Full Name</label>
+              <div className="field-wrap" style={fieldBorder(errors.name)}>
+                <span className="field-icon"><UserIcon /></span>
+                <input className="field-input" style={{ border:"none", boxShadow:"none" }}
+                  name="name" value={form.name}
+                  onChange={handleChange} onBlur={handleBlur}
+                  placeholder="Your full name" />
+              </div>
+              <ErrorMsg message={errors.name} />
+            </div>
+
+            <div className="field-group">
+              <label className="field-label">Email</label>
+              <div className="field-wrap" style={fieldBorder(errors.email)}>
+                <span className="field-icon"><MailIcon /></span>
+                <input className="field-input" style={{ border:"none", boxShadow:"none" }}
+                  name="email" type="email" value={form.email}
+                  onChange={handleChange} onBlur={handleBlur}
+                  placeholder="you@university.kz" />
+              </div>
+              <ErrorMsg message={errors.email} />
+            </div>
+
+            <div className="field-group">
+              <label className="field-label">Phone Number</label>
+              <div className="field-wrap" style={fieldBorder(errors.phone)}>
+                <span className="field-icon"><PhoneIcon /></span>
+                <input className="field-input" style={{ border:"none", boxShadow:"none" }}
+                  name="phone" type="tel" value={form.phone}
+                  onChange={handlePhoneChange}
+                  onFocus={handlePhoneFocus}
+                  onBlur={handlePhoneBlur}
+                  placeholder="+7 (7XX) XXX-XX-XX" />
+              </div>
+              <ErrorMsg message={errors.phone} />
+            </div>
+
+            <button className="primary-btn"
+              style={{ marginTop:12, opacity:isFormReady?1:0.45, cursor:isFormReady?"pointer":"not-allowed", transition:"opacity 0.25s ease" }}
+              onClick={submit} disabled={!isFormReady}>
+              Create Account <ArrowRight size={16} />
+            </button>
+
+            <p className="form-terms">
+              By signing up, you agree to our{" "}
+              <button className="auth-link" style={{ fontSize:11 }}>Terms of Service</button>{" "}and{" "}
+              <button className="auth-link" style={{ fontSize:11 }}>Privacy Policy</button>
+            </p>
+
+            <div className="form-footer">
+              Already have an account?{" "}
+              <button onClick={() => navigate("/login")}>Log In</button>
+            </div>
+          </div>
         </div>
-
-        <div className="auth-bullet">
-          <div className="auth-bullet__dot" />
-          Delete your account anytime
-        </div>
       </div>
-    </div>
-
-    <div className="auth-left__footer">
-      <div className="auth-stat">
-        <div className="auth-stat__num">60 sec</div>
-        <div className="auth-stat__label">Registration Time</div>
-      </div>
-
-      <div className="auth-stat">
-        <div className="auth-stat__num">100%</div>
-        <div className="auth-stat__label">Free</div>
-      </div>
-    </div>
-  </div>
-
-  <div className="auth-right">
-    <div className="form-card">
-      <button
-        className="form-back"
-        onClick={() => navigate("/login")}
-      >
-        <ArrowLeft size={14} strokeWidth={2} />
-        Back to Login
-      </button>
-
-      <h2 className="form-card__title">Create Account</h2>
-
-      <p className="form-card__subtitle">
-        Fill in your details to register.
-      </p>
-
-      <div className="field-group">
-        <label className="field-label">Full Name</label>
-
-        <div
-          className="field-wrap"
-          style={fieldBorder(errors.name)}
-        >
-          <span className="field-icon">
-            <UserIcon />
-          </span>
-
-          <input
-            className="field-input"
-            style={{ border: "none", boxShadow: "none" }}
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            placeholder="Your full name"
-          />
-        </div>
-
-        <ErrorMsg message={errors.name} />
-      </div>
-
-      <div className="field-group">
-        <label className="field-label">Email</label>
-
-        <div
-          className="field-wrap"
-          style={fieldBorder(errors.email)}
-        >
-          <span className="field-icon">
-            <MailIcon />
-          </span>
-
-          <input
-            className="field-input"
-            style={{ border: "none", boxShadow: "none" }}
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            placeholder="you@university.kz"
-          />
-        </div>
-
-        <ErrorMsg message={errors.email} />
-      </div>
-
-      <div className="field-group">
-        <label className="field-label">Phone Number</label>
-
-        <div
-          className="field-wrap"
-          style={fieldBorder(errors.phone)}
-        >
-          <span className="field-icon">
-            <PhoneIcon />
-          </span>
-
-          <input
-            className="field-input"
-            style={{ border: "none", boxShadow: "none" }}
-            name="phone"
-            type="tel"
-            value={form.phone}
-            onChange={handlePhoneChange}
-            onFocus={handlePhoneFocus}
-            onBlur={handlePhoneBlur}
-            placeholder="+7 (7XX) XXX-XX-XX"
-          />
-        </div>
-
-        <ErrorMsg message={errors.phone} />
-      </div>
-
-      <button
-        className="primary-btn"
-        style={{
-          marginTop: 12,
-          opacity: isFormReady ? 1 : 0.45,
-          cursor: isFormReady ? "pointer" : "not-allowed",
-          transition: "opacity 0.25s ease",
-        }}
-        onClick={submit}
-        disabled={!isFormReady}
-      >
-        Create Account <ArrowRight size={16} />
-      </button>
-
-      <p className="form-terms">
-        By signing up, you agree to our{" "}
-        <button className="auth-link" style={{ fontSize: 11 }}>
-          Terms of Service
-        </button>{" "}
-        and{" "}
-        <button className="auth-link" style={{ fontSize: 11 }}>
-          Privacy Policy
-        </button>
-      </p>
-
-      <div className="form-footer">
-        Already have an account?{" "}
-        <button onClick={() => navigate("/login")}>
-          Log In
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
     </>
   );
 };
