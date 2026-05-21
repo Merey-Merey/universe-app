@@ -8,6 +8,7 @@ import {
   Home, Building2, Calendar, User, LogOut,
   Search, MapPin, Heart, CheckCircle2,
 } from "lucide-react";
+import { useUser } from "../context/UserContext";
 
 export interface JobItem {
   id: number;
@@ -162,44 +163,39 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
   activeNav, setActiveNav,
 }) => {
   const navigate = useNavigate();
+  const { user } = useUser();
   return (
     <aside className="home-sidebar">
       <div className="home-sidebar__logo">
         <span className="home-sidebar__logo-uni">Uni</span>
         <span className="home-sidebar__logo-verse">Verse</span>
       </div>
-          <nav className="home-sidebar__nav">
-  {navItems.map(item => (
-    <button
-      key={item.id}
-      className={`home-sidebar__item ${
-        activeNav === item.id ? "home-sidebar__item--active" : ""
-      }`}
-      onClick={() => {
-        setActiveNav(item.id);
-
-        if (item.id === "home") navigate("/home");
-        if (item.id === "jobs") navigate("/jobs");
-        if (item.id === "housing") navigate("/housing");
-        if (item.id === "events") navigate("/events");
-        if (item.id === "profile") navigate("/profile");
-      }}
-    >
-      {item.icon}
-      {item.label}
-
-      {/* {item.id === "home" && (
-        <span className="home-sidebar__item-badge">3</span>
-      )} */}
-    </button>
-  ))}
-</nav>
+      <nav className="home-sidebar__nav">
+        {navItems.map(item => (
+          <button key={item.id}
+            className={`home-sidebar__item ${activeNav === item.id ? "home-sidebar__item--active" : ""}`}
+            onClick={() => {
+              setActiveNav(item.id);
+              if (item.id === "home") navigate("/home");
+              if (item.id === "jobs") navigate("/jobs");
+              if (item.id === "housing") navigate("/housing");
+              if (item.id === "events") navigate("/events");
+              if (item.id === "profile") navigate("/profile");
+            }}>
+            {item.icon}{item.label}
+          </button>
+        ))}
+      </nav>
       <div className="home-sidebar__bottom">
         <div className="home-sidebar__user">
-          <div className="home-sidebar__avatar">AB</div>
+          <div className="home-sidebar__avatar">
+            {user.initials || <User size={18} />}
+          </div>
           <div>
-            <div className="home-sidebar__user-name">Aymakhan Balausa</div>
-            <div className="home-sidebar__user-meta">Shymkent · Student</div>
+            <div className="home-sidebar__user-name">{user.fullName || "—"}</div>
+            <div className="home-sidebar__user-meta">
+              {[user.city, user.role].filter(Boolean).join(" · ") || "Student"}
+            </div>
           </div>
         </div>
         <button className="home-sidebar__item"
@@ -212,9 +208,9 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
   );
 };
 
-
 export const JobsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user, toggleSavedJob } = useUser();
   const [activeNav, setActiveNav] = useState("jobs");
   const [search, setSearch] = useState("");
   const [activeCity, setActiveCity] = useState("Remote");
@@ -230,22 +226,26 @@ export const JobsPage: React.FC = () => {
     return matchSearch && matchType;
   });
 
-  const JobListItem: React.FC<{ job: JobItem }> = ({ job }) => (
-    <div
-      className="new-job-row"
-      onClick={() => navigate(`/jobs/${job.id}`)}
-      style={{ borderLeft: `3px solid ${job.accentColor}` }}
-    >
-      <div className="new-job-row__info">
-        <div className="new-job-row__title">{job.title}</div>
-        <div className="new-job-row__meta">{job.company} · {job.location}</div>
-        <span className="new-job-row__tag">{job.type}</span>
+  const JobListItem: React.FC<{ job: JobItem }> = ({ job }) => {
+    const isSaved = (user.savedJobIds ?? []).includes(job.id);
+    return (
+      <div className="new-job-row" onClick={() => navigate(`/jobs/${job.id}`)}
+        style={{ borderLeft: `3px solid ${job.accentColor}` }}>
+        <div className="new-job-row__info">
+          <div className="new-job-row__title">{job.title}</div>
+          <div className="new-job-row__meta">{job.company} · {job.location}</div>
+          <span className="new-job-row__tag">{job.type}</span>
+        </div>
+        <div className="new-job-row__right">
+          <div className="new-job-row__salary">{job.salary}<span>/mo</span></div>
+          <button style={{ background:"none", border:"none", cursor:"pointer", padding:4 }}
+            onClick={e => { e.stopPropagation(); toggleSavedJob(job.id); }}>
+            <Heart size={16} fill={isSaved ? "#462370" : "none"} color="#462370" strokeWidth={1.5} />
+          </button>
+        </div>
       </div>
-      <div className="new-job-row__right">
-        <div className="new-job-row__salary">{job.salary}<span>/mo</span></div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const MainContent = () => (
     <div className="new-jobs-page">
@@ -254,42 +254,28 @@ export const JobsPage: React.FC = () => {
 
       <div className="new-jobs-search">
         <Search size={16} color="#A09DC5" />
-        <input
-          className="new-jobs-search__input"
-          placeholder="Job title, company"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+        <input className="new-jobs-search__input" placeholder="Job title, company"
+          value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
-      {}
       <div className="new-jobs-filters">
         {cityFilters.map(f => (
-          <button
-            key={f}
+          <button key={f}
             className={`new-jobs-filter ${activeCity === f ? "new-jobs-filter--active" : ""}`}
-            onClick={() => setActiveCity(f)}
-          >{f}</button>
+            onClick={() => setActiveCity(f)}>{f}</button>
         ))}
       </div>
 
-      {}
       <div className="new-jobs-filters" style={{ marginTop: 6 }}>
         {typeFilters.map(f => (
-          <button
-            key={f}
+          <button key={f}
             className={`new-jobs-filter ${activeType === f ? "new-jobs-filter--active" : ""}`}
-            onClick={() => setActiveType(f)}
-          >{f}</button>
+            onClick={() => setActiveType(f)}>{f}</button>
         ))}
       </div>
 
-      {}
       <p className="new-jobs-section-label">TOP PICK</p>
-      <div
-        className="new-job-top-pick"
-        onClick={() => navigate(`/jobs/${topPick.id}`)}
-      >
+      <div className="new-job-top-pick" onClick={() => navigate(`/jobs/${topPick.id}`)}>
         <div className="new-job-top-pick__top">
           <div>
             <div className="new-job-top-pick__title">{topPick.title}</div>
@@ -306,12 +292,10 @@ export const JobsPage: React.FC = () => {
         </div>
       </div>
 
-      {}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "18px 0 10px" }}>
         <span className="new-jobs-section-jobs-title">Jobs</span>
       </div>
 
-      {}
       <div className="new-jobs-list">
         {filtered.map(j => <JobListItem key={j.id} job={j} />)}
       </div>
@@ -320,61 +304,37 @@ export const JobsPage: React.FC = () => {
 
   return (
     <div className="home-screen">
-
-      {}
       <div className="home-mobile" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
-        <div style={{ flex: 1, overflowY: "auto" }}>
-          <MainContent />
+        <div style={{ flex: 1, overflowY: "auto" }}><MainContent /></div>
+        <div className="home-navbar">
+          {navItems.map(item => {
+            const isActive = activeNav === item.id;
+            return (
+              <button key={item.id}
+                className={`home-nav-item ${isActive ? "home-nav-item--active" : "home-nav-item--inactive"}`}
+                onClick={() => {
+                  setActiveNav(item.id);
+                  if (item.id === "home") navigate("/home");
+                  if (item.id === "jobs") navigate("/jobs");
+                  if (item.id === "housing") navigate("/housing");
+                  if (item.id === "events") navigate("/events");
+                  if (item.id === "profile") navigate("/profile");
+                }}>
+                {item.icon}
+                <span className={`home-nav-label ${isActive ? "home-nav-label--show" : "home-nav-label--hide"}`}>
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
-          <div className="home-navbar">
-  {navItems.map(item => {
-    const isActive = activeNav === item.id;
-
-    return (
-      <button
-        key={item.id}
-        className={`home-nav-item ${
-          isActive
-            ? "home-nav-item--active"
-            : "home-nav-item--inactive"
-        }`}
-        onClick={() => {
-          setActiveNav(item.id);
-
-          if (item.id === "home") navigate("/home");
-          if (item.id === "jobs") navigate("/jobs");
-          if (item.id === "housing") navigate("/housing");
-          if (item.id === "events") navigate("/events");
-          if (item.id === "profile") navigate("/profile");
-        }}
-      >
-        {item.icon}
-
-        <span
-          className={`home-nav-label ${
-            isActive
-              ? "home-nav-label--show"
-              : "home-nav-label--hide"
-          }`}
-        >
-          {item.label}
-        </span>
-      </button>
-    );
-  })}
-</div>
-        {}
       </div>
 
-      {}
       <div className="home-desktop" style={{ flex: 1 }}>
         <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} />
         <div className="home-main">
-          {}
           <div style={{ flex: 1, overflowY: "auto" }}>
-            <div className="home-content">
-              <MainContent />
-            </div>
+            <div className="home-content"><MainContent /></div>
           </div>
         </div>
       </div>
@@ -382,19 +342,23 @@ export const JobsPage: React.FC = () => {
   );
 };
 
-
 export const JobDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [activeNav, setActiveNav] = useState("jobs");
-  const [saved, setSaved] = useState(false);
+  const [activeNav] = useState("jobs");
+  const { user, toggleSavedJob, applyToJob } = useUser();
 
   const job = JOBS.find(j => j.id === Number(id)) ?? JOBS[0];
+  const isSaved   = (user.savedJobIds   ?? []).includes(job.id);
+  const isApplied = (user.appliedJobIds ?? []).includes(job.id);
+
+  const handleApply = () => {
+    applyToJob(job.id);
+    navigate(`/jobs/${job.id}/apply`);
+  };
 
   const DetailContent = () => (
     <div className="new-job-detail">
-
-      {}
       <div className="new-job-detail__card">
         <div className="new-job-detail__card-top">
           <div className="new-job-detail__logo-wrap">
@@ -408,28 +372,23 @@ export const JobDetailPage: React.FC = () => {
           </div>
           <span className="new-job-detail__top-badge">TOP PICK</span>
         </div>
-
         <div className="new-job-detail__card-tags">
           <span className="new-job-detail__card-tag">{job.mode}</span>
           <span className="new-job-detail__card-tag">{job.type}</span>
           <span className="new-job-detail__card-tag">React</span>
         </div>
-
         <div className="new-job-detail__card-salary-row">
           <div>
             <div className="new-job-detail__salary">{job.salary}</div>
             <div className="new-job-detail__salary-sub">{job.salaryPeriod}</div>
           </div>
-          <button
-            className="new-job-detail__quick-apply"
-            onClick={() => navigate(`/jobs/${job.id}/apply`)}
-          >
-            Quick Apply
+          <button className="new-job-detail__quick-apply" onClick={handleApply}
+            style={isApplied ? { background: "#059669", color: "#fff" } : undefined}>
+            {isApplied ? "Applied ✓" : "Quick Apply"}
           </button>
         </div>
       </div>
 
-      {}
       <div className="new-job-detail__info-tiles">
         <div className="new-job-detail__tile">
           <div className="new-job-detail__tile-value">{job.experience}</div>
@@ -445,13 +404,11 @@ export const JobDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {}
       <div className="new-job-detail__section">
         <h3 className="new-job-detail__section-title">About the role</h3>
         <p className="new-job-detail__section-text">{job.about}</p>
       </div>
 
-      {}
       <div className="new-job-detail__section">
         <h3 className="new-job-detail__section-title">Requirements</h3>
         <div className="new-job-detail__reqs">
@@ -464,17 +421,13 @@ export const JobDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {}
       <div className="new-job-detail__section">
         <h3 className="new-job-detail__section-title">Skills</h3>
         <div className="new-job-detail__skills">
-          {job.skills.map(s => (
-            <span key={s} className="new-job-detail__skill-tag">{s}</span>
-          ))}
+          {job.skills.map(s => <span key={s} className="new-job-detail__skill-tag">{s}</span>)}
         </div>
       </div>
 
-      {}
       <div className="new-job-detail__section">
         <h3 className="new-job-detail__section-title">About the company</h3>
         <div className="new-job-detail__company-card">
@@ -489,7 +442,6 @@ export const JobDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {}
       <div className="new-job-detail__section">
         <h3 className="new-job-detail__section-title">Similar jobs</h3>
         {JOBS.filter(j => j.id !== job.id).slice(0, 2).map(j => (
@@ -506,20 +458,16 @@ export const JobDetailPage: React.FC = () => {
         ))}
       </div>
 
-      {}
       <div className="new-job-detail__cta-row">
         <button
-          className={`new-job-detail__save-btn ${saved ? "new-job-detail__save-btn--saved" : ""}`}
-          onClick={() => setSaved(v => !v)}
-        >
-          <Heart size={16} fill={saved ? "#1E1B4B" : "none"} color="#1E1B4B" />
-          {saved ? "Saved" : "Save"}
+          className={`new-job-detail__save-btn ${isSaved ? "new-job-detail__save-btn--saved" : ""}`}
+          onClick={() => toggleSavedJob(job.id)}>
+          <Heart size={16} fill={isSaved ? "#1E1B4B" : "none"} color="#1E1B4B" />
+          {isSaved ? "Saved" : "Save"}
         </button>
-        <button
-          className="new-job-detail__apply-btn"
-          onClick={() => navigate(`/jobs/${job.id}/apply`)}
-        >
-          Apply now
+        <button className="new-job-detail__apply-btn" onClick={handleApply}
+          style={isApplied ? { background: "#059669" } : undefined}>
+          {isApplied ? "Applied ✓" : "Apply now"}
         </button>
       </div>
     </div>
@@ -527,8 +475,6 @@ export const JobDetailPage: React.FC = () => {
 
   return (
     <div className="home-screen">
-
-      {}
       <div className="home-mobile" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
         <div className="ann-page-topbar">
           <button className="ann-back-btn" onClick={() => navigate(-1)}>
@@ -542,9 +488,8 @@ export const JobDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {}
       <div className="home-desktop" style={{ flex: 1 }}>
-        <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} />
+        <Sidebar activeNav={activeNav} setActiveNav={() => {}} />
         <div className="home-main">
           <div className="home-topbar">
             <div className="home-topbar__greeting">
@@ -554,27 +499,17 @@ export const JobDetailPage: React.FC = () => {
               <h1 style={{ marginTop: 8 }}>Job Detail</h1>
               <p>Full information about the position</p>
             </div>
-            <div className="home-topbar__right">
-              {}
-            </div>
           </div>
           <div className="home-content" style={{ overflowY: "auto" }}>
             <div className="ann-detail-desk-layout">
-              <div className="ann-detail-desk-main">
-                <DetailContent />
-              </div>
+              <div className="ann-detail-desk-main"><DetailContent /></div>
               <div className="ann-detail-desk-aside">
                 <h3 className="ann-detail-desk-aside__title">Other Jobs</h3>
                 {JOBS.filter(j => j.id !== job.id).map(j => (
-                  <div key={j.id} className="ann-aside-card"
-                    onClick={() => navigate(`/jobs/${j.id}`)}>
+                  <div key={j.id} className="ann-aside-card" onClick={() => navigate(`/jobs/${j.id}`)}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                      <div className="job-logo-xs" style={{ background: j.companyColor }}>
-                        {j.companyLogo}
-                      </div>
-                      <span className="ann-aside-card__cat">
-                        <BriefcaseBusiness size={11} /> {j.type}
-                      </span>
+                      <div className="job-logo-xs" style={{ background: j.companyColor }}>{j.companyLogo}</div>
+                      <span className="ann-aside-card__cat"><BriefcaseBusiness size={11} /> {j.type}</span>
                     </div>
                     <div className="ann-aside-card__title">{j.title}</div>
                     <div className="ann-aside-card__meta">{j.company} · {j.salaryShort}</div>

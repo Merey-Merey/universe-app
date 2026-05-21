@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/static-components */
 import React, { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +9,10 @@ import {
   Eye, EyeOff, Trash2,
 } from "lucide-react";
 import { useUser, getInitials, getAvatarLetter } from "../context/UserContext";
+import { JOBS } from "./Jobs";        
+import * as HousingModule from "./Housing";
+
+const HOUSING_LISTINGS: any[] = (HousingModule as any).HOUSING_LISTINGS ?? (HousingModule as any).default ?? [];
 
 const navItems = [
   { id: "home",    label: "Home",    icon: <Home size={22} />              },
@@ -41,7 +46,6 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
               navigate(routes[item.id] ?? "/home");
             }}>
             {item.icon}{item.label}
-            {/* {item.id === "home" && <span className="home-sidebar__item-badge">3</span>} */}
           </button>
         ))}
       </nav>
@@ -69,15 +73,12 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   PROFILE PAGE
-   ════════════════════════════════════════════════════════════ */
+
 export const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const [activeNav, setActiveNav] = useState("profile");
 
-  // Dynamic counters based on real data
   const savedJobsCount    = (user.savedJobIds    ?? []).length;
   const savedHousingCount = (user.savedHousingIds ?? []).length;
   const savedTotal        = savedJobsCount + savedHousingCount;
@@ -218,15 +219,11 @@ export const ProfilePage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   BASIC INFO PAGE  — fixed inputs + photo upload
-   ════════════════════════════════════════════════════════════ */
 export const BasicInfoPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, setUser } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Use uncontrolled-style local state — initialized once, updated freely
   const [fullName,   setFullName]   = useState(() => user.fullName   ?? "");
   const [email,      setEmail]      = useState(() => user.email      ?? "");
   const [phone,      setPhone]      = useState(() => user.phone      ?? "");
@@ -237,7 +234,6 @@ export const BasicInfoPage: React.FC = () => {
 
   const years = ["1st", "2nd", "3rd", "4th", "5th", "6th+"];
 
-  // Stable handlers — won't cause remount issues
   const handleFullName   = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setFullName(e.target.value),   []);
   const handleEmail      = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value),      []);
   const handlePhone      = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value),      []);
@@ -247,27 +243,18 @@ export const BasicInfoPage: React.FC = () => {
   const handlePhotoChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setAvatarUrl(url);
+    setAvatarUrl(URL.createObjectURL(file));
   }, []);
 
   const handleSave = () => {
     setUser(u => ({
-      ...u,
-      fullName,
-      email,
-      phone,
-      university,
-      faculty,
-      year,
-      avatarUrl,
+      ...u, fullName, email, phone, university, faculty, year, avatarUrl,
       initials:     getInitials(fullName),
       avatarLetter: getAvatarLetter(fullName),
     }));
     navigate(-1);
   };
 
-  // Render avatar preview (local state, not user context — only saved on button click)
   const AvatarPreview = () => (
     avatarUrl
       ? <img src={avatarUrl} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }} />
@@ -293,24 +280,13 @@ export const BasicInfoPage: React.FC = () => {
           />
         </div>
       </div>
-
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        style={{ display: "none" }}
-        onChange={handlePhotoChange}
-      />
-
+      <input ref={fileInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handlePhotoChange} />
       <div className="home-desktop" style={{ flex: 1 }}>
         <Sidebar activeNav="profile" setActiveNav={() => {}} />
         <div className="home-main">
           <div className="home-topbar">
             <div className="home-topbar__greeting">
-              <button className="ann-desk-back" onClick={() => navigate(-1)}>
-                <ArrowLeft size={16} /> Back
-              </button>
+              <button className="ann-desk-back" onClick={() => navigate(-1)}><ArrowLeft size={16} /> Back</button>
               <h1 style={{ marginTop: 8 }}>Basic Info</h1>
               <p>Manage your personal and academic information</p>
             </div>
@@ -353,7 +329,6 @@ export const BasicInfoPage: React.FC = () => {
   );
 };
 
-/* Extracted as a plain functional component (not nested) to avoid remount on every keystroke */
 interface BasicInfoContentProps {
   avatarPreview: React.ReactNode;
   fullName: string;   onFullName: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -375,9 +350,7 @@ const PageContentBasicInfo: React.FC<BasicInfoContentProps> = ({
 }) => (
   <>
     <div className="ann-page-topbar">
-      <button className="ann-back-btn" onClick={onBack}>
-        <ArrowLeft size={18} color="#1E1B4B" strokeWidth={2} />
-      </button>
+      <button className="ann-back-btn" onClick={onBack}><ArrowLeft size={18} color="#1E1B4B" strokeWidth={2} /></button>
       <span className="ann-page-title">Basic Info</span>
       <div style={{ width: 40 }} />
     </div>
@@ -389,14 +362,11 @@ const PageContentBasicInfo: React.FC<BasicInfoContentProps> = ({
             <Pencil size={12} color="#1E1B4B" strokeWidth={2} />
           </button>
         </div>
-        <button className="prof-change-photo-btn" onClick={onPhotoClick} type="button">
-          Change photo
-        </button>
+        <button className="prof-change-photo-btn" onClick={onPhotoClick} type="button">Change photo</button>
       </div>
 
       <div className="prof-form-section">
         <p className="prof-form-section__label">PERSONAL INFO</p>
-
         <div className="prof-field">
           <label className="prof-field__label">Full Name</label>
           <div className="prof-field__input-wrap">
@@ -404,7 +374,6 @@ const PageContentBasicInfo: React.FC<BasicInfoContentProps> = ({
             <Pencil size={16} color="#462370" strokeWidth={1.5} />
           </div>
         </div>
-
         <div className="prof-field">
           <label className="prof-field__label">Email</label>
           <div className="prof-field__input-wrap">
@@ -412,7 +381,6 @@ const PageContentBasicInfo: React.FC<BasicInfoContentProps> = ({
             <Pencil size={16} color="#462370" strokeWidth={1.5} />
           </div>
         </div>
-
         <div className="prof-field">
           <label className="prof-field__label">Phone number</label>
           <div className="prof-field__input-wrap">
@@ -424,27 +392,23 @@ const PageContentBasicInfo: React.FC<BasicInfoContentProps> = ({
 
       <div className="prof-form-section">
         <p className="prof-form-section__label">ACADEMIC INFO</p>
-
         <div className="prof-field">
           <label className="prof-field__label">University</label>
           <div className="prof-field__input-wrap">
             <input className="prof-field__input" value={university} onChange={onUniversity} />
           </div>
         </div>
-
         <div className="prof-field">
           <label className="prof-field__label">Faculty / Major</label>
           <div className="prof-field__input-wrap">
             <input className="prof-field__input" value={faculty} onChange={onFaculty} />
           </div>
         </div>
-
         <div className="prof-field">
           <label className="prof-field__label">Year of study</label>
           <div className="prof-years-row">
             {years.map(y => (
-              <button key={y}
-                className={`prof-year-chip ${year === y ? "prof-year-chip--active" : ""}`}
+              <button key={y} className={`prof-year-chip ${year === y ? "prof-year-chip--active" : ""}`}
                 onClick={() => onYear(y)}>{y}</button>
             ))}
           </div>
@@ -457,23 +421,15 @@ const PageContentBasicInfo: React.FC<BasicInfoContentProps> = ({
 );
 
 
-/* ════════════════════════════════════════════════════════════
-   MY APPLICATIONS PAGE
-   ════════════════════════════════════════════════════════════ */
-interface Application {
-  id: number; title: string; company: string; appliedDate: string;
-  status: "Under review" | "Interview set" | "Not selected";
-  logoInitials: string; logoBg: string;
-  filter: "Pending" | "Accepted" | "No";
-}
+type AppFilter = "All" | "Pending" | "Accepted" | "No";
 
-const APPLICATIONS: Application[] = [
-  { id: 1, title: "Frontend Developer",  company: "Kaspi Bank",    appliedDate: "Applied May 10", status: "Under review",  logoInitials: "K",  logoBg: "#E84B2A", filter: "Pending"  },
-  { id: 2, title: "UX/UI Designer",      company: "Kolesa Group",  appliedDate: "Applied May 8",  status: "Interview set", logoInitials: "KG", logoBg: "#2563EB", filter: "Accepted" },
-  { id: 3, title: "Data Analyst Intern", company: "Chocofamily",   appliedDate: "Applied May 5",  status: "Not selected",  logoInitials: "CF", logoBg: "#7C3AED", filter: "No"       },
-];
+const statusInfo = (id: number): { status: "Under review" | "Interview set" | "Not selected"; filter: AppFilter } => {
+  if (id % 3 === 0) return { status: "Not selected",  filter: "No"       };
+  if (id % 3 === 1) return { status: "Under review",  filter: "Pending"  };
+  return              { status: "Interview set", filter: "Accepted" };
+};
 
-const statusIcon = (status: Application["status"]) => {
+const statusIcon = (status: "Under review" | "Interview set" | "Not selected") => {
   if (status === "Under review")  return <Clock    size={14} color="#27236B" strokeWidth={1.5} />;
   if (status === "Interview set") return <Calendar size={14} color="#27236B" strokeWidth={1.5} />;
   return <X size={14} color="#27236B" strokeWidth={2} />;
@@ -481,19 +437,27 @@ const statusIcon = (status: Application["status"]) => {
 
 export const MyApplicationsPage: React.FC = () => {
   const navigate = useNavigate();
-  const [activeFilter, setActiveFilter] = useState<"All" | "Pending" | "Accepted" | "No">("All");
-  const [applications] = useState<Application[]>(APPLICATIONS);
+  const { user } = useUser();
+  const [activeFilter, setActiveFilter] = useState<AppFilter>("All");
+  const applications = (user.appliedJobIds ?? []).map((id, idx) => {
+    const job = JOBS.find(j => j.id === id);
+    const { status, filter } = statusInfo(id);
+    const appliedDate = `Applied May ${10 + (idx % 15)}`;
+    return { id, title: job?.title ?? "Unknown", company: job?.company ?? "—",
+      appliedDate, status, filter,
+      logoInitials: job?.companyLogo ?? "?", logoBg: job?.companyColor ?? "#888" };
+  });
 
   const pendingCount  = applications.filter(a => a.filter === "Pending").length;
   const acceptedCount = applications.filter(a => a.filter === "Accepted").length;
   const noCount       = applications.filter(a => a.filter === "No").length;
   const totalCount    = applications.length;
 
-  const filters = [
-    { key: "All"      as const, label: `All (${totalCount})`  },
-    { key: "Pending"  as const, label: "Pending"              },
-    { key: "Accepted" as const, label: "Accepted"             },
-    { key: "No"       as const, label: "No"                   },
+  const filters: { key: AppFilter; label: string }[] = [
+    { key: "All",      label: `All (${totalCount})` },
+    { key: "Pending",  label: "Pending"             },
+    { key: "Accepted", label: "Accepted"            },
+    { key: "No",       label: "No"                  },
   ];
 
   const filtered = activeFilter === "All" ? applications : applications.filter(a => a.filter === activeFilter);
@@ -501,41 +465,49 @@ export const MyApplicationsPage: React.FC = () => {
   const PageContent = () => (
     <>
       <div className="ann-page-topbar">
-        <button className="ann-back-btn" onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} color="#1E1B4B" strokeWidth={2} />
-        </button>
+        <button className="ann-back-btn" onClick={() => navigate(-1)}><ArrowLeft size={18} color="#1E1B4B" strokeWidth={2} /></button>
         <span className="ann-page-title">My Applications</span>
         <div style={{ width: 40 }} />
       </div>
       <div style={{ padding: "0 16px 48px", display: "flex", flexDirection: "column", gap: 12 }}>
-        <div className="prof-app-filters">
-          {filters.map(f => (
-            <button key={f.key}
-              className={`prof-app-filter ${activeFilter === f.key ? "prof-app-filter--active" : ""}`}
-              onClick={() => setActiveFilter(f.key)}>{f.label}</button>
-          ))}
-        </div>
-        {filtered.map(app => (
-          <div key={app.id} className="prof-app-card">
-            <div className="prof-app-card__logo" style={{ background: app.logoBg }}>{app.logoInitials}</div>
-            <div className="prof-app-card__body">
-              <div className="prof-app-card__title">{app.title}</div>
-              <div className="prof-app-card__sub">{app.company} · {app.appliedDate}</div>
-              <div className="prof-app-card__status">
-                {statusIcon(app.status)}<span>{app.status}</span>
+        {totalCount === 0 ? (
+          <p style={{ fontFamily: "Space Grotesk, sans-serif", color: "#A09DC5", textAlign: "center", marginTop: 40 }}>
+            You haven't applied to any jobs yet.
+          </p>
+        ) : (
+          <>
+            <div className="prof-app-filters">
+              {filters.map(f => (
+                <button key={f.key}
+                  className={`prof-app-filter ${activeFilter === f.key ? "prof-app-filter--active" : ""}`}
+                  onClick={() => setActiveFilter(f.key)}>{f.label}</button>
+              ))}
+            </div>
+            {filtered.map(app => (
+              <div key={app.id} className="prof-app-card">
+                <div className="prof-app-card__logo" style={{ background: app.logoBg }}>{app.logoInitials}</div>
+                <div className="prof-app-card__body">
+                  <div className="prof-app-card__title">{app.title}</div>
+                  <div className="prof-app-card__sub">{app.company} · {app.appliedDate}</div>
+                  <div className="prof-app-card__status">
+                    {statusIcon(app.status)}<span>{app.status}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
-        {acceptedCount > 0 && (
-          <div className="prof-interview-banner">
-            <div className="prof-interview-banner__left">
-              <p className="prof-interview-banner__eyebrow">UPCOMING INTERVIEW</p>
-              <p className="prof-interview-banner__title">Kolesa Group - May 19, 2:00PM</p>
-              <p className="prof-interview-banner__sub">Online · Google Meet</p>
-            </div>
-            <button className="prof-interview-join-btn">Join <ArrowRight size={12} /></button>
-          </div>
+            ))}
+            {acceptedCount > 0 && (
+              <div className="prof-interview-banner">
+                <div className="prof-interview-banner__left">
+                  <p className="prof-interview-banner__eyebrow">UPCOMING INTERVIEW</p>
+                  <p className="prof-interview-banner__title">
+                    {applications.find(a => a.filter === "Accepted")?.company} - May 19, 2:00PM
+                  </p>
+                  <p className="prof-interview-banner__sub">Online · Google Meet</p>
+                </div>
+                <button className="prof-interview-join-btn">Join <ArrowRight size={12} /></button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>
@@ -551,9 +523,7 @@ export const MyApplicationsPage: React.FC = () => {
         <div className="home-main">
           <div className="home-topbar">
             <div className="home-topbar__greeting">
-              <button className="ann-desk-back" onClick={() => navigate(-1)}>
-                <ArrowLeft size={16} /> Back to Profile
-              </button>
+              <button className="ann-desk-back" onClick={() => navigate(-1)}><ArrowLeft size={16} /> Back to Profile</button>
               <h1 style={{ marginTop: 8 }}>My Applications</h1>
               <p>Track the status of your job applications</p>
             </div>
@@ -588,9 +558,6 @@ export const MyApplicationsPage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   PRIVACY & SECURITY PAGE
-   ════════════════════════════════════════════════════════════ */
 export const PrivacySecurityPage: React.FC = () => {
   const navigate = useNavigate();
   const [currentPw,   setCurrentPw]   = useState("");
@@ -637,8 +604,7 @@ export const PrivacySecurityPage: React.FC = () => {
       <div className="prof-form-section" style={{ marginTop: 8 }}>
         <p className="prof-form-section__label">CHANGE PASSWORD</p>
         <PwField label="Current password" value={currentPw} onChange={setCurrentPw}
-          show={showCurrent} onToggle={() => setShowCurrent(v => !v)}
-          placeholder="Enter current password" />
+          show={showCurrent} onToggle={() => setShowCurrent(v => !v)} placeholder="Enter current password" />
         <PwField label="New password" value={newPw} onChange={v => { setNewPw(v); setSuccess(false); }}
           show={showNew} onToggle={() => setShowNew(v => !v)} placeholder="Min. 6 characters" />
         <PwField label="Confirm new password" value={confirmPw}
@@ -676,9 +642,7 @@ export const PrivacySecurityPage: React.FC = () => {
     <div className="home-screen">
       <div className="home-mobile" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
         <div className="ann-page-topbar">
-          <button className="ann-back-btn" onClick={() => navigate(-1)}>
-            <ArrowLeft size={18} color="#1E1B4B" strokeWidth={2} />
-          </button>
+          <button className="ann-back-btn" onClick={() => navigate(-1)}><ArrowLeft size={18} color="#1E1B4B" strokeWidth={2} /></button>
           <span className="ann-page-title">Privacy &amp; Security</span>
           <div style={{ width: 40 }} />
         </div>
@@ -689,9 +653,7 @@ export const PrivacySecurityPage: React.FC = () => {
         <div className="home-main">
           <div className="home-topbar">
             <div className="home-topbar__greeting">
-              <button className="ann-desk-back" onClick={() => navigate(-1)}>
-                <ArrowLeft size={16} /> Back to Profile
-              </button>
+              <button className="ann-desk-back" onClick={() => navigate(-1)}><ArrowLeft size={16} /> Back to Profile</button>
               <h1 style={{ marginTop: 8 }}>Privacy &amp; Security</h1>
               <p>Manage your password and account security</p>
             </div>
@@ -720,37 +682,14 @@ export const PrivacySecurityPage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   NOTIFICATIONS PAGE
-   ════════════════════════════════════════════════════════════ */
 interface NotifItem {
   id: number; title: string; body: string; time: string; read: boolean;
   logo: React.ReactNode; day: "today" | "yesterday";
 }
-
-const KaspiLogo    = () => (
-  <div style={{ width:40,height:40,borderRadius:12,background:"#E84B2A",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
-    <span style={{ color:"#fff",fontWeight:700,fontSize:14,fontFamily:"Space Grotesk, sans-serif" }}>K</span>
-  </div>
-);
-const KolesaLogo   = () => (
-  <div style={{ width:40,height:40,borderRadius:12,background:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
-    <span style={{ color:"#fff",fontWeight:700,fontSize:11,fontFamily:"Space Grotesk, sans-serif" }}>KG</span>
-  </div>
-);
-const ShymkentHubLogo = () => (
-  <div style={{ width:40,height:40,borderRadius:12,background:"#F8F7FF",border:"1px solid #EDE9FE",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <circle cx="11" cy="11" r="9" stroke="#462370" strokeWidth="1.5"/>
-      <circle cx="11" cy="11" r="4" fill="#462370"/>
-    </svg>
-  </div>
-);
-const GenericLogo = ({ color="#A09DC5", letter="N" }: { color?:string; letter?:string }) => (
-  <div style={{ width:40,height:40,borderRadius:12,background:color,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
-    <span style={{ color:"#fff",fontWeight:700,fontSize:14,fontFamily:"Space Grotesk, sans-serif" }}>{letter}</span>
-  </div>
-);
+const KaspiLogo    = () => <div style={{ width:40,height:40,borderRadius:12,background:"#E84B2A",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}><span style={{ color:"#fff",fontWeight:700,fontSize:14,fontFamily:"Space Grotesk, sans-serif" }}>K</span></div>;
+const KolesaLogo   = () => <div style={{ width:40,height:40,borderRadius:12,background:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}><span style={{ color:"#fff",fontWeight:700,fontSize:11,fontFamily:"Space Grotesk, sans-serif" }}>KG</span></div>;
+const ShymkentHubLogo = () => <div style={{ width:40,height:40,borderRadius:12,background:"#F8F7FF",border:"1px solid #EDE9FE",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="9" stroke="#462370" strokeWidth="1.5"/><circle cx="11" cy="11" r="4" fill="#462370"/></svg></div>;
+const GenericLogo = ({ color="#A09DC5", letter="N" }: { color?:string; letter?:string }) => <div style={{ width:40,height:40,borderRadius:12,background:color,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}><span style={{ color:"#fff",fontWeight:700,fontSize:14,fontFamily:"Space Grotesk, sans-serif" }}>{letter}</span></div>;
 
 const NOTIFS: NotifItem[] = [
   { id:1, day:"today",     read:true,  title:"New job match!",         body:"Frontend Dev at Kaspi matches your profile. Check it out.",        time:"2 min ago",  logo:<KaspiLogo />                             },
@@ -773,11 +712,7 @@ export const NotificationsPage: React.FC = () => {
     <div className="notif-row" style={{ background: n.read ? "#F8F7FF" : "#fff" }} onClick={() => toggle(n.id)}>
       <button className={`notif-checkbox ${n.read ? "notif-checkbox--checked" : ""}`}
         onClick={e => { e.stopPropagation(); toggle(n.id); }} aria-label={n.read ? "Mark unread" : "Mark read"}>
-        {n.read && (
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-            <path d="M1.5 5l2.5 2.5 4.5-5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        )}
+        {n.read && <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
       </button>
       {n.logo}
       <div className="notif-row__body">
@@ -793,9 +728,7 @@ export const NotificationsPage: React.FC = () => {
   const PageContent = () => (
     <div style={{ paddingBottom: 48 }}>
       <div className="ann-page-topbar" style={{ paddingLeft:16, paddingRight:16 }}>
-        <button className="ann-back-btn" onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} color="#1E1B4B" strokeWidth={2} />
-        </button>
+        <button className="ann-back-btn" onClick={() => navigate(-1)}><ArrowLeft size={18} color="#1E1B4B" strokeWidth={2} /></button>
         <span className="ann-page-title">Notifications</span>
         <button className="notif-clear-btn" onClick={clearAll}>Clear all</button>
       </div>
@@ -817,9 +750,7 @@ export const NotificationsPage: React.FC = () => {
         <div className="home-main">
           <div className="home-topbar">
             <div className="home-topbar__greeting">
-              <button className="ann-desk-back" onClick={() => navigate(-1)}>
-                <ArrowLeft size={16} /> Back to Profile
-              </button>
+              <button className="ann-desk-back" onClick={() => navigate(-1)}><ArrowLeft size={16} /> Back to Profile</button>
               <h1 style={{ marginTop:8 }}>Notifications</h1>
               <p>Stay up to date with your activity</p>
             </div>
@@ -850,66 +781,54 @@ export const NotificationsPage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   SAVED PAGE
-   ════════════════════════════════════════════════════════════ */
-interface SavedJob     { id:number; title:string; company:string; type:string; mode:string; salary:string; month:string; day:number; tags:string[]; accentColor:string; }
-interface SavedHousing { id:number; title:string; location:string; price:string; month:string; day:number; tags:string[]; accentColor:string; }
-
-const SAVED_JOBS: SavedJob[] = [
-  { id:1, title:"Frontend Developer", company:"Kaspi Bank",    type:"Part-time", mode:"Remote", salary:"₸250,000", month:"MAY", day:17, tags:["₸250,000"],           accentColor:"#4C1D95" },
-  { id:2, title:"UI/UX Design",       company:"Kolesa Group",  type:"Freelance", mode:"Remote", salary:"₸200,000", month:"MAY", day:23, tags:["Design","₸200,000"],  accentColor:"#A78BFA" },
-  { id:3, title:"Data Analyst Intern",company:"Chocofamily",   type:"Full-time", mode:"Office", salary:"₸180,000", month:"MAY", day:28, tags:["₸180,000"],           accentColor:"#4C1D95" },
-  { id:4, title:"Mobile Developer",   company:"Jusan Bank",    type:"Full-time", mode:"Hybrid", salary:"₸350,000", month:"MAY", day:28, tags:["₸350,000"],           accentColor:"#4C1D95" },
-];
-const SAVED_HOUSING: SavedHousing[] = [
-  { id:1, title:"Studio near SKSU",    location:"Shymkent · 1 bed",      price:"₸60,000/mo",  month:"MAY", day:15, tags:["Studio","₸60,000"],   accentColor:"#4C1D95" },
-  { id:2, title:"2-room apartment",    location:"Almaty · Al-Farabi",    price:"₸120,000/mo", month:"MAY", day:18, tags:["2-room","₸120,000"],  accentColor:"#A78BFA" },
-  { id:3, title:"Room in shared flat", location:"Shymkent · Center",     price:"₸35,000/mo",  month:"MAY", day:20, tags:["Shared","₸35,000"],   accentColor:"#4C1D95" },
-];
-
 export const SavedPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user, toggleSavedJob, toggleSavedHousing } = useUser();
   const [tab, setTab] = useState<"Jobs"|"Housing">("Jobs");
-  const [savedJobs,    setSavedJobs]    = useState<SavedJob[]>(SAVED_JOBS);
-  const [savedHousing, setSavedHousing] = useState<SavedHousing[]>(SAVED_HOUSING);
 
-  const JobCard = ({ item }: { item: SavedJob }) => (
+  const savedJobs    = JOBS.filter(j => (user.savedJobIds ?? []).includes(j.id));
+  const savedHousing = HOUSING_LISTINGS.filter(h => (user.savedHousingIds ?? []).includes(h.id));
+
+  const JobCard = ({ item }: { item: typeof JOBS[0] }) => (
     <div className="saved-card" onClick={() => navigate(`/jobs/${item.id}`)}>
       <div className="saved-card__accent" style={{ background: item.accentColor }} />
       <div className="saved-card__body">
         <div className="saved-card__date-badge">
-          <span className="saved-card__month">{item.month}</span>
-          <span className="saved-card__day">{item.day}</span>
+          <span className="saved-card__month">MAY</span>
+          <span className="saved-card__day">{item.id * 3 + 14}</span>
         </div>
         <div className="saved-card__info">
           <div className="saved-card__title">{item.title}</div>
           <div className="saved-card__meta">{item.company} · {item.type} · {item.mode}</div>
-          <div className="saved-card__tags">{item.tags.map(t => <span key={t} className="saved-card__tag">{t}</span>)}</div>
+          <div className="saved-card__tags">
+            <span className="saved-card__tag">{item.salary}</span>
+          </div>
         </div>
         <button className="saved-card__heart saved-card__heart--active"
-          onClick={e => { e.stopPropagation(); setSavedJobs(prev => prev.filter(j => j.id !== item.id)); }}>
+          onClick={e => { e.stopPropagation(); toggleSavedJob(item.id); }}>
           <Heart size={16} fill="#462370" color="#462370" />
         </button>
       </div>
     </div>
   );
 
-  const HousingCard = ({ item }: { item: SavedHousing }) => (
+  const HousingCard = ({ item }: { item: typeof HOUSING_LISTINGS[0] }) => (
     <div className="saved-card">
-      <div className="saved-card__accent" style={{ background: item.accentColor }} />
+      <div className="saved-card__accent" style={{ background: "#4C1D95" }} />
       <div className="saved-card__body">
         <div className="saved-card__date-badge">
-          <span className="saved-card__month">{item.month}</span>
-          <span className="saved-card__day">{item.day}</span>
+          <span className="saved-card__month">MAY</span>
+          <span className="saved-card__day">{item.id * 4 + 11}</span>
         </div>
         <div className="saved-card__info">
           <div className="saved-card__title">{item.title}</div>
           <div className="saved-card__meta">{item.location}</div>
-          <div className="saved-card__tags">{item.tags.map(t => <span key={t} className="saved-card__tag">{t}</span>)}</div>
+          <div className="saved-card__tags">
+            <span className="saved-card__tag">{item.price}</span>
+          </div>
         </div>
         <button className="saved-card__heart saved-card__heart--active"
-          onClick={e => { e.stopPropagation(); setSavedHousing(prev => prev.filter(h => h.id !== item.id)); }}>
+          onClick={e => { e.stopPropagation(); toggleSavedHousing(item.id); }}>
           <Heart size={16} fill="#462370" color="#462370" />
         </button>
       </div>
@@ -919,9 +838,7 @@ export const SavedPage: React.FC = () => {
   const PageContent = () => (
     <>
       <div className="ann-page-topbar">
-        <button className="ann-back-btn" onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} color="#1E1B4B" strokeWidth={2} />
-        </button>
+        <button className="ann-back-btn" onClick={() => navigate(-1)}><ArrowLeft size={18} color="#1E1B4B" strokeWidth={2} /></button>
         <span className="ann-page-title">Saved</span>
         <div style={{ width: 40 }} />
       </div>
@@ -935,8 +852,12 @@ export const SavedPage: React.FC = () => {
         </div>
         <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
           {tab === "Jobs"
-            ? savedJobs.length > 0    ? savedJobs.map(j    => <JobCard     key={j.id} item={j} />) : <p className="saved-empty">No saved jobs yet</p>
-            : savedHousing.length > 0 ? savedHousing.map(h => <HousingCard key={h.id} item={h} />) : <p className="saved-empty">No saved housing yet</p>
+            ? savedJobs.length > 0
+              ? savedJobs.map(j => <JobCard key={j.id} item={j} />)
+              : <p className="saved-empty">No saved jobs yet</p>
+            : savedHousing.length > 0
+              ? savedHousing.map(h => <HousingCard key={h.id} item={h} />)
+              : <p className="saved-empty">No saved housing yet</p>
           }
         </div>
         <p className="saved-hint">Tap the heart icon to remove from saved</p>
@@ -954,9 +875,7 @@ export const SavedPage: React.FC = () => {
         <div className="home-main">
           <div className="home-topbar">
             <div className="home-topbar__greeting">
-              <button className="ann-desk-back" onClick={() => navigate(-1)}>
-                <ArrowLeft size={16} /> Back to Profile
-              </button>
+              <button className="ann-desk-back" onClick={() => navigate(-1)}><ArrowLeft size={16} /> Back to Profile</button>
               <h1 style={{ marginTop:8 }}>Saved</h1>
               <p>Your bookmarked jobs and housing listings</p>
             </div>
@@ -989,9 +908,7 @@ export const SavedPage: React.FC = () => {
   );
 };
 
-/* ════════════════════════════════════════════════════════════
-   SETTINGS PAGE
-   ════════════════════════════════════════════════════════════ */
+
 interface ToggleRowProps { label:string; checked:boolean; onChange:(v:boolean)=>void; }
 const ToggleRow: React.FC<ToggleRowProps> = ({ label, checked, onChange }) => (
   <div className="settings-row">
@@ -1090,9 +1007,7 @@ export const SettingsPage: React.FC = () => {
     <div className="home-screen">
       <div className="home-mobile" style={{ flexDirection:"column", height:"100vh", overflow:"hidden" }}>
         <div className="ann-page-topbar">
-          <button className="ann-back-btn" onClick={() => navigate(-1)}>
-            <ArrowLeft size={18} color="#1E1B4B" strokeWidth={2} />
-          </button>
+          <button className="ann-back-btn" onClick={() => navigate(-1)}><ArrowLeft size={18} color="#1E1B4B" strokeWidth={2} /></button>
           <span className="ann-page-title">Settings</span>
           <div style={{ width:40 }} />
         </div>
@@ -1103,9 +1018,7 @@ export const SettingsPage: React.FC = () => {
         <div className="home-main">
           <div className="home-topbar">
             <div className="home-topbar__greeting">
-              <button className="ann-desk-back" onClick={() => navigate(-1)}>
-                <ArrowLeft size={16} /> Back to Profile
-              </button>
+              <button className="ann-desk-back" onClick={() => navigate(-1)}><ArrowLeft size={16} /> Back to Profile</button>
               <h1 style={{ marginTop:8 }}>Settings</h1>
               <p>Manage your app preferences and account</p>
             </div>

@@ -4,21 +4,19 @@ import React, { createContext, useContext, useState } from "react";
 
 export interface User {
   avatarUrl: any;
-  savedJobIds: never[];
-  savedHousingIds: never[];
-  appliedJobIds: never[];
-  eventIds: never[];
-  fullName: string;       // "Aymakhan Balausa"
-  email: string;          // "aymakhanbalausa@gmail.com"
-  phone: string;          // "+7 771 887 33 37"
-  university: string;     // "SKSU — South Kazakhstan State Univ."
-  faculty: string;        // "Information Technologies"
-  year: string;           // "3rd"
-  city: string;           // "Shymkent"
-  role: string;           // "Student"
-  /** Первые буквы имени и фамилии, например "AB" */
+  savedJobIds: number[];
+  savedHousingIds: number[];
+  appliedJobIds: number[];
+  eventIds: number[];
+  fullName: string;
+  email: string;
+  phone: string;
+  university: string;
+  faculty: string;
+  year: string;
+  city: string;
+  role: string;
   initials: string;
-  /** Первая буква имени для большого аватара, например "A" */
   avatarLetter: string;
   avatar?: string;
 }
@@ -26,35 +24,76 @@ export interface User {
 interface UserContextValue {
   user: User;
   setUser: React.Dispatch<React.SetStateAction<User>>;
+  toggleSavedJob:     (id: number) => void;
+  toggleSavedHousing: (id: number) => void;
+  applyToJob:         (id: number) => void;
+  registerEvent:      (id: number) => void;
 }
 
 const defaultUser: User = {
-    fullName: "",
-    email: "",
-    phone: "+7 (",
-    university: "",
-    faculty: "",
-    year: "1st",
-    city: "",
-    role: "Student",
-    initials: "",
-    avatarLetter: "",
-    avatarUrl: undefined,
-    savedJobIds: [],
-    savedHousingIds: [],
-    appliedJobIds: [],
-    eventIds: []
+  fullName: "",
+  email: "",
+  phone: "+7 (",
+  university: "",
+  faculty: "",
+  year: "1st",
+  city: "",
+  role: "Student",
+  initials: "",
+  avatarLetter: "",
+  avatarUrl: undefined,
+  savedJobIds: [],
+  savedHousingIds: [],
+  appliedJobIds: [],
+  eventIds: [],
 };
 
 const UserContext = createContext<UserContextValue>({
   user: defaultUser,
   setUser: () => {},
+  toggleSavedJob:     () => {},
+  toggleSavedHousing: () => {},
+  applyToJob:         () => {},
+  registerEvent:      () => {},
 });
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User>(defaultUser);
+
+  const toggleSavedJob = (id: number) =>
+    setUser(u => ({
+      ...u,
+      savedJobIds: u.savedJobIds.includes(id)
+        ? u.savedJobIds.filter(x => x !== id)
+        : [...u.savedJobIds, id],
+    }));
+
+  const toggleSavedHousing = (id: number) =>
+    setUser(u => ({
+      ...u,
+      savedHousingIds: u.savedHousingIds.includes(id)
+        ? u.savedHousingIds.filter(x => x !== id)
+        : [...u.savedHousingIds, id],
+    }));
+
+  const applyToJob = (id: number) =>
+    setUser(u => ({
+      ...u,
+      appliedJobIds: u.appliedJobIds.includes(id)
+        ? u.appliedJobIds
+        : [...u.appliedJobIds, id],
+    }));
+
+  const registerEvent = (id: number) =>
+    setUser(u => ({
+      ...u,
+      eventIds: u.eventIds.includes(id)
+        ? u.eventIds
+        : [...u.eventIds, id],
+    }));
+
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, toggleSavedJob, toggleSavedHousing, applyToJob, registerEvent }}>
       {children}
     </UserContext.Provider>
   );
@@ -62,7 +101,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useUser = () => useContext(UserContext);
 
-/** Утилита: вычислить инициалы из полного имени */
 export const getInitials = (fullName: string): string => {
   const parts = fullName.trim().split(/\s+/);
   if (parts.length === 0 || !parts[0]) return "";
@@ -70,7 +108,6 @@ export const getInitials = (fullName: string): string => {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 };
 
-/** Утилита: первая буква имени */
 export const getAvatarLetter = (fullName: string): string => {
   const first = fullName.trim().split(/\s+/)[0];
   return first ? first[0].toUpperCase() : "";

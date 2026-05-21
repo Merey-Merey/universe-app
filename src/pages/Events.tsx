@@ -7,6 +7,7 @@ import {
   LogOut, Search, Bell, Heart, ArrowLeft, Check,
   ChevronDown, Users, BookOpen,
 } from "lucide-react";
+import { useUser } from "../context/UserContext";
 
 export interface EventItem {
   id: number;
@@ -67,44 +68,39 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
   activeNav, setActiveNav,
 }) => {
   const navigate = useNavigate();
+  const { user } = useUser();
   return (
     <aside className="home-sidebar">
       <div className="home-sidebar__logo">
         <span className="home-sidebar__logo-uni">Uni</span>
         <span className="home-sidebar__logo-verse">Verse</span>
       </div>
-          <nav className="home-sidebar__nav">
-  {navItems.map(item => (
-    <button
-      key={item.id}
-      className={`home-sidebar__item ${
-        activeNav === item.id ? "home-sidebar__item--active" : ""
-      }`}
-      onClick={() => {
-        setActiveNav(item.id);
-
-        if (item.id === "home") navigate("/home");
-        if (item.id === "jobs") navigate("/jobs");
-        if (item.id === "housing") navigate("/housing");
-        if (item.id === "events") navigate("/events");
-        if (item.id === "profile") navigate("/profile");
-      }}
-    >
-      {item.icon}
-      {item.label}
-
-      {/* {item.id === "home" && (
-        <span className="home-sidebar__item-badge">3</span>
-      )} */}
-    </button>
-  ))}
-</nav>
+      <nav className="home-sidebar__nav">
+        {navItems.map(item => (
+          <button key={item.id}
+            className={`home-sidebar__item ${activeNav === item.id ? "home-sidebar__item--active" : ""}`}
+            onClick={() => {
+              setActiveNav(item.id);
+              if (item.id === "home") navigate("/home");
+              if (item.id === "jobs") navigate("/jobs");
+              if (item.id === "housing") navigate("/housing");
+              if (item.id === "events") navigate("/events");
+              if (item.id === "profile") navigate("/profile");
+            }}>
+            {item.icon}{item.label}
+          </button>
+        ))}
+      </nav>
       <div className="home-sidebar__bottom">
         <div className="home-sidebar__user">
-          <div className="home-sidebar__avatar">AB</div>
+          <div className="home-sidebar__avatar">
+            {user.initials || <User size={18} />}
+          </div>
           <div>
-            <div className="home-sidebar__user-name">Aymakhan Balausa</div>
-            <div className="home-sidebar__user-meta">Shymkent · Student</div>
+            <div className="home-sidebar__user-name">{user.fullName || "—"}</div>
+            <div className="home-sidebar__user-meta">
+              {[user.city, user.role].filter(Boolean).join(" · ") || "Student"}
+            </div>
           </div>
         </div>
         <button className="home-sidebar__item"
@@ -116,7 +112,6 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
     </aside>
   );
 };
-
 
 const EventTicket: React.FC<{
   event: EventItem; fullName: string; role: string;
@@ -285,51 +280,38 @@ export const EventsPage: React.FC = () => {
     <div className="home-screen">
       <div className="home-mobile" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
         <div style={{ flex: 1, overflowY: "auto" }}><MainContent /></div>
-          <div className="home-navbar">
-  {navItems.map(item => {
-    const isActive = activeNav === item.id;
-
-    return (
-      <button
-        key={item.id}
-        className={`home-nav-item ${
-          isActive
-            ? "home-nav-item--active"
-            : "home-nav-item--inactive"
-        }`}
-        onClick={() => {
-          setActiveNav(item.id);
-
-          if (item.id === "home") navigate("/home");
-          if (item.id === "jobs") navigate("/jobs");
-          if (item.id === "housing") navigate("/housing");
-          if (item.id === "events") navigate("/events");
-          if (item.id === "profile") navigate("/profile");
-        }}
-      >
-        {item.icon}
-
-        <span
-          className={`home-nav-label ${
-            isActive
-              ? "home-nav-label--show"
-              : "home-nav-label--hide"
-          }`}
-        >
-          {item.label}
-        </span>
-      </button>
-    );
-  })}
-</div>
+        <div className="home-navbar">
+          {navItems.map(item => {
+            const isActive = activeNav === item.id;
+            return (
+              <button key={item.id}
+                className={`home-nav-item ${isActive ? "home-nav-item--active" : "home-nav-item--inactive"}`}
+                onClick={() => {
+                  setActiveNav(item.id);
+                  if (item.id === "home") navigate("/home");
+                  if (item.id === "jobs") navigate("/jobs");
+                  if (item.id === "housing") navigate("/housing");
+                  if (item.id === "events") navigate("/events");
+                  if (item.id === "profile") navigate("/profile");
+                }}>
+                {item.icon}
+                <span className={`home-nav-label ${isActive ? "home-nav-label--show" : "home-nav-label--hide"}`}>
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
       <div className="home-desktop" style={{ flex: 1 }}>
         <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} />
         <div className="home-main">
           <div className="home-topbar">
-            <div className="home-topbar__greeting"><h1>Events </h1><p>Upcoming events</p></div>
+            <div className="home-topbar__greeting"><h1>Events</h1><p>Upcoming events</p></div>
             <div className="home-topbar__right">
-              
+              <div className="home-topbar__notif">
+                <Bell size={17} color="#1E1B4B" /><div className="home-topbar__notif-dot" />
+              </div>
             </div>
           </div>
           <div className="home-content">
@@ -403,26 +385,25 @@ export const EventsPage: React.FC = () => {
   );
 };
 
-
 export const EventRegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { user } = useUser();
   const event = EVENTS.find(e => e.id === Number(id)) ?? EVENTS[0];
   const [step, setStep] = useState(1);
-
-  const [fullName,   setFullName]   = useState("Aymakhan Balausa");
-  const [email,      setEmail]      = useState("aymakhanbalausa@gmail.com");
-  const [phone,      setPhone]      = useState("+7 771 887 33 37");
-  const [university, setUniversity] = useState("SKSU");
-  const [faculty,    setFaculty]    = useState("Information Technologies");
-  const [year,       setYear]       = useState("3rd");
+  const [fullName,   setFullName]   = useState(() => user.fullName   || "");
+  const [email,      setEmail]      = useState(() => user.email      || "");
+  const [phone,      setPhone]      = useState(() => user.phone      || "");
+  const [university, setUniversity] = useState(() => user.university || "");
+  const [faculty,    setFaculty]    = useState(() => user.faculty    || "");
+  const [year,       setYear]       = useState(() => user.year       || "1st");
   const [linkedin,   setLinkedin]   = useState("");
   const [attendance, setAttendance] = useState<"In person"|"Online">("In person");
-  const [role,       setRole]       = useState("Student");
+  const [role,       setRole]       = useState(() => user.role       || "Student");
   const [interests,  setInterests]  = useState<string[]>(["Jobs", "Networking"]);
   const [expLevel,   setExpLevel]   = useState(50);
   const [specialReqs,setSpecialReqs]= useState("");
-  const [city,       setCity]       = useState("");
+  const [city,       setCity]       = useState(() => user.city       || "");
 
   const years = ["1st","2nd","3rd","4th","5th","6th+"];
   const roles = ["Student","Graduate","Professional"];
@@ -602,6 +583,7 @@ export const EventRegisterPage: React.FC = () => {
       </div>
     </div>
   );
+  const { registerEvent } = useUser();
 
   const Step3 = () => {
     const ReviewRow: React.FC<{label:string;value:string;onEdit:()=>void}> = ({label,value,onEdit}) => (
@@ -616,6 +598,11 @@ export const EventRegisterPage: React.FC = () => {
         <div className="ev-review-divider"/>
       </>
     );
+
+    const handleSubmit = () => {
+      registerEvent(event.id);
+      navigate(`/events/${event.id}/success`);
+    };
 
     return (
       <div className="ev-reg-form">
@@ -643,13 +630,13 @@ export const EventRegisterPage: React.FC = () => {
         </div>
 
         <p className="ev-reg-section-label">YOUR TICKET</p>
-        <EventTicket event={event} fullName={fullName.split(" ").slice(-1)[0]}
+        <EventTicket event={event}
+          fullName={fullName.split(" ").slice(-1)[0] || fullName}
           role={role} attendance={attendance} showQR={false}/>
 
         <div className="ev-reg-btn-row">
           <button className="ev-reg-back-btn" onClick={()=>setStep(2)}>← Back</button>
-          <button className="ev-reg-next-btn" style={{flex:1}}
-            onClick={()=>navigate(`/events/${event.id}/success`)}>
+          <button className="ev-reg-next-btn" style={{flex:1}} onClick={handleSubmit}>
             Submit Registration
           </button>
         </div>
@@ -732,12 +719,13 @@ export const EventRegisterPage: React.FC = () => {
   );
 };
 
-
 export const EventRegisteredPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { user } = useUser();
   const event = EVENTS.find(e => e.id === Number(id)) ?? EVENTS[0];
   const otherEvents = EVENTS.filter(e => e.id !== event.id).slice(0, 2);
+  const displayName = user.fullName || "Guest";
 
   const SuccessContent = () => (
     <div className="ev-success-page">
@@ -764,8 +752,13 @@ export const EventRegisteredPage: React.FC = () => {
         </p>
       </div>
 
-      <EventTicket event={event} fullName="Aymakhan Balausa"
-        role="Student" attendance="In person" showQR={true}/>
+      <EventTicket
+        event={event}
+        fullName={displayName}
+        role={user.role || "Student"}
+        attendance="In person"
+        showQR={true}
+      />
 
       <div className="ev-success-others">
         <p className="ev-success-others__title">Other upcoming events</p>

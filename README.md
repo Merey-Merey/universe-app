@@ -6,16 +6,12 @@
 universe-app/
 ├── src/
 │   ├── App.tsx                    # Главный роутер (web / mobile режим)
-│   ├── MobileApp.tsx              # Оболочка мобильного приложения + навигация
 │   ├── main.tsx                   # Точка входа
 │   │
-│   ├── screens/                   # Экраны мобильного приложения
-│   │   ├── LogoScreen.tsx         # Splash / Logo screen (авто-переход через 2.5с)
-│   │   ├── OnboardingScreen.tsx   # Онбординг 1–3 + иллюстрации (SVG)
-│   │   └── SignUpScreen.tsx       # Sign Up форма
-│   │
-│   └── pages/
-│       └── WebLanding.tsx         # Полноценный веб-лендинг (dark, responsive)
+│   ├── pages/                     # Экраны и полноценный веб-лендинг мобильного приложения
+│       ├── LogoPage.tsx           # Splash / Logo screen (авто-переход через 2.5с)
+│       ├── OnboardingPage.tsx     # Онбординг 1–3 + иллюстрации (SVG)
+│       └── SignUpPage.tsx         # Sign Up форма
 │
 ├── index.html
 ├── package.json
@@ -33,12 +29,6 @@ npm run dev
 ```
 
 Откройте http://localhost:5173
-
-## Переключение режимов
-
-В правом верхнем углу есть кнопки:
-- **🌐 Web** — лендинг сайт (dark theme, адаптивный)
-- **📱 Mobile** — мобильное приложение в рамке телефона
 
 ## Что реализовано
 
@@ -79,18 +69,3 @@ npm run dev
 - Accent: `#7C3AED`
 - Text: `#0F0E2A`
 
-## Как добавить новые экраны
-
-1. Создайте файл в `src/screens/NewScreen.tsx`
-2. Добавьте тип в `MobileApp.tsx` → `type Screen = "logo" | "onboarding" | "signup" | "new"`
-3. Добавьте рендер в `MobileApp.tsx`
-4. Добавьте навигацию по кнопкам
-
-## Следующие шаги
-
-- [ ] Добавить React Router для нормальной маршрутизации
-- [ ] Подключить реальные иллюстрации из Figma (заменить SVG)
-- [ ] Добавить Framer Motion для более плавных переходов
-- [ ] Добавить экран Home/Dashboard
-- [ ] Добавить экраны Jobs, Housing, Events
-- [ ] Подключить API/backend
