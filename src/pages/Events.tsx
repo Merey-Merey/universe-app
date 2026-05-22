@@ -76,7 +76,7 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
   }
 
   return (
-    <aside className="home-sidebar">
+    <aside className="homee-sidebar">
       <div className="home-sidebar__logo">
         <span className="home-sidebar__logo-uni">Uni</span>
         <span className="home-sidebar__logo-verse">Verse</span>

@@ -69,6 +69,8 @@ export const ResetPasswordPage: React.FC = () => {
     setPwdErr(pe); setCfmErr(ce);
     setPwdTouched(true); setCfmTouched(true);
     if (pe || ce) return;
+    sessionStorage.removeItem("universe-reset-contact");
+    sessionStorage.removeItem("universe-reset-verified");
     navigate("/home");
   };
 

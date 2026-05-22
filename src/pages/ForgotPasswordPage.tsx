@@ -23,11 +23,18 @@ export const ForgotPasswordPage: React.FC = () => {
   const [contact, setContact] = useState("");
   const [error, setError]     = useState("");
   const [touched, setTouched] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const persistResetContact = (value: string) => {
+    sessionStorage.setItem("universe-reset-contact", value.trim());
+    sessionStorage.setItem("universe-reset-verified", "0");
+  };
 
   const isReady = contact.trim().length > 0 && !validate.contact(contact);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setContact(e.target.value);
+    setError("");
     if (touched) setError(validate.contact(e.target.value));
   };
 
@@ -36,12 +43,19 @@ export const ForgotPasswordPage: React.FC = () => {
     setError(validate.contact(contact));
   };
 
-  const submit = () => {
+  const submit = async () => {
     const e = validate.contact(contact);
     setError(e);
     setTouched(true);
     if (e) return;
-    navigate("/verification");
+
+    setSubmitting(true);
+    try {
+      persistResetContact(contact);
+      navigate("/verification", { state: { contact: contact.trim() } });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -70,8 +84,8 @@ export const ForgotPasswordPage: React.FC = () => {
           </div>
           <div className="auth-actions">
             <button className="primary-btn" onClick={submit}
-              disabled={!isReady} style={btnStyle(isReady)}>
-              Submit
+              disabled={!isReady || submitting} style={btnStyle(isReady && !submitting)}>
+              {submitting ? "Sending..." : "Submit"}
             </button>
           </div>
         </div>
@@ -182,12 +196,12 @@ export const ForgotPasswordPage: React.FC = () => {
         className="primary-btn"
         style={{
           marginTop: 8,
-          ...btnStyle(isReady),
+          ...btnStyle(isReady && !submitting),
         }}
         onClick={submit}
-        disabled={!isReady}
+        disabled={!isReady || submitting}
       >
-        Send Code <ArrowRight size={16} />
+        {submitting ? "Sending..." : <>Send Code <ArrowRight size={16} /></>}
       </button>
 
       <div className="form-footer">
@@ -202,6 +216,5 @@ export const ForgotPasswordPage: React.FC = () => {
     </>
   );
 };
-
 
 

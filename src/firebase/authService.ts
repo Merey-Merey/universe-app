@@ -2,6 +2,8 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   signOut,
   sendPasswordResetEmail,
@@ -31,6 +33,24 @@ export const signInWithGoogle = async (): Promise<UserCredential> => {
     email: credential.user.email ?? "",
     avatarUrl: credential.user.photoURL ?? "",
   });
+  return credential;
+};
+
+export const startGoogleRedirectSignIn = async (): Promise<void> => {
+  const provider = new GoogleAuthProvider();
+  await signInWithRedirect(auth, provider);
+};
+
+export const getGoogleRedirectSignInResult = async (): Promise<UserCredential | null> => {
+  const credential = await getRedirectResult(auth);
+  if (!credential) return null;
+
+  await createUserProfile(credential.user.uid, {
+    fullName: credential.user.displayName ?? "",
+    email: credential.user.email ?? "",
+    avatarUrl: credential.user.photoURL ?? "",
+  });
+
   return credential;
 };
 

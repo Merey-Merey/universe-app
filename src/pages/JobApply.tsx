@@ -1,31 +1,30 @@
-/* eslint-disable react-hooks/static-components */
-
 import React, { useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Upload, CheckCircle } from "lucide-react";
 import { JOBS } from "./Jobs";
+import { useUser } from "../context/UserContext";
 
 
 export const JobApplyPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { user, applyToJob } = useUser();
   const job = JOBS.find(j => j.id === Number(id)) ?? JOBS[0];
 
-  const [fullName,     setFullName]     = useState("");
-  const [email,        setEmail]        = useState("");
-  const [phone,        setPhone]        = useState("");
+  const [fullName,     setFullName]     = useState(() => user.fullName || "");
+  const [email,        setEmail]        = useState(() => user.email || "");
+  const [phone,        setPhone]        = useState(() => user.phone || "");
   const [coverLetter,  setCoverLetter]  = useState("");
   const [cvFile,       setCvFile]       = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = () => {
+    applyToJob(job.id);
     navigate(`/jobs/${job.id}/sent`);
   };
 
-  const Content = () => (
-    <div className="apply-body">
-
-      {}
+  const renderContent = (mobile?: boolean) => (
+    <div className={`apply-body ${mobile ? "apply-body--mobile" : ""}`}>
       <div className="apply-job-card">
         <div className="job-logo-sm" style={{ background: job.companyColor, width: 47, height: 47, borderRadius: 12, fontSize: 13 }}>
           {job.companyLogo}
@@ -36,7 +35,6 @@ export const JobApplyPage: React.FC = () => {
         </div>
       </div>
 
-      {}
       <div className="apply-field-group">
         <label className="apply-label">Full Name</label>
         <input
@@ -48,7 +46,6 @@ export const JobApplyPage: React.FC = () => {
         />
       </div>
 
-      {}
       <div className="apply-field-group">
         <label className="apply-label">Email</label>
         <input
@@ -60,7 +57,6 @@ export const JobApplyPage: React.FC = () => {
         />
       </div>
 
-      {}
       <div className="apply-field-group">
         <label className="apply-label">Phone number</label>
         <input
@@ -72,7 +68,6 @@ export const JobApplyPage: React.FC = () => {
         />
       </div>
 
-      {}
       <div className="apply-field-group">
         <label className="apply-label">Cover letter</label>
         <textarea
@@ -83,12 +78,12 @@ export const JobApplyPage: React.FC = () => {
         />
       </div>
 
-      {}
       <div className="apply-field-group">
         <div className="apply-label">Upload your CV</div>
         <div className="apply-cv-hint">We support only PDF max. 2mb</div>
         <button
           className={`apply-upload-zone ${cvFile ? "apply-upload-zone--done" : ""}`}
+          type="button"
           onClick={() => fileRef.current?.click()}>
           {cvFile ? (
             <>
@@ -111,7 +106,6 @@ export const JobApplyPage: React.FC = () => {
         />
       </div>
 
-      {}
       <button className="apply-submit-btn" onClick={handleSubmit}>
         Submit application
       </button>
@@ -120,8 +114,6 @@ export const JobApplyPage: React.FC = () => {
 
   return (
     <div className="home-screen">
-
-      {}
       <div className="home-mobile" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
         <div className="ann-page-topbar">
           <button className="ann-back-btn" onClick={() => navigate(-1)}>
@@ -131,14 +123,12 @@ export const JobApplyPage: React.FC = () => {
           <div style={{ width: 40 }} />
         </div>
 
-        <div className="home-content" style={{ padding: "0 16px 32px" }}>
-          <Content />
+        <div className="home-content apply-page-content" style={{ padding: "0 16px 20px" }}>
+          {renderContent(true)}
         </div>
       </div>
 
-      {}
       <div className="home-desktop" style={{ flex: 1 }}>
-        {}
         <div className="apply-desk-wrapper">
           <div className="apply-desk-card">
             <button className="ann-desk-back" onClick={() => navigate(-1)} style={{ marginBottom: 20 }}>
@@ -146,7 +136,7 @@ export const JobApplyPage: React.FC = () => {
             </button>
             <h1 className="apply-desk-title">Apply for job</h1>
             <p className="apply-desk-sub">Fill in your details below to submit your application</p>
-            <Content />
+            {renderContent()}
           </div>
         </div>
       </div>

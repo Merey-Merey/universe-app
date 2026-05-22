@@ -203,6 +203,67 @@ const Feed: React.FC<{
   );
 };
 
+const DesktopHero: React.FC<{
+  firstName: string;
+  headerMeta: string;
+  navigate: ReturnType<typeof useNavigate>;
+}> = ({ firstName, headerMeta, navigate }) => (
+  <section className="home-web-hero">
+    <div className="home-web-hero__copy">
+      <div className="home-web-hero__eyebrow">
+        <Sparkles size={14} />
+        UniVerse Web
+      </div>
+      <h2 className="home-web-hero__title">
+        {firstName ? `${firstName}, shape your semester with more than a checklist.` : "Shape your semester with more than a checklist."}
+      </h2>
+      <p className="home-web-hero__text">
+        Track openings, discover events, and move between campus life and career goals from one place.
+        {` ${headerMeta}`}
+      </p>
+      <div className="home-web-hero__actions">
+        <button className="home-web-hero__btn home-web-hero__btn--primary" onClick={() => navigate("/jobs")}>
+          Explore Jobs <ArrowRight size={16} />
+        </button>
+        <button className="home-web-hero__btn home-web-hero__btn--ghost" onClick={() => navigate("/events")}>
+          Upcoming Events
+        </button>
+      </div>
+      <div className="home-web-hero__stats">
+        <div className="home-web-hero__stat">
+          <span className="home-web-hero__stat-value">24/7</span>
+          <span className="home-web-hero__stat-label">Campus flow</span>
+        </div>
+        <div className="home-web-hero__stat">
+          <span className="home-web-hero__stat-value">50K+</span>
+          <span className="home-web-hero__stat-label">Students connected</span>
+        </div>
+        <div className="home-web-hero__stat">
+          <span className="home-web-hero__stat-value">All-in-one</span>
+          <span className="home-web-hero__stat-label">Jobs, homes, events</span>
+        </div>
+      </div>
+    </div>
+
+    <div className="home-web-hero__visual">
+      <div className="home-web-hero__glow" />
+      <div className="home-web-hero__orbit home-web-hero__orbit--a" />
+      <div className="home-web-hero__orbit home-web-hero__orbit--b" />
+      <img className="home-web-hero__logo" src="/logo.png" alt="UniVerse logo" />
+      <div className="home-web-hero__floating-card home-web-hero__floating-card--top">
+        <span className="home-web-hero__floating-label">Next event</span>
+        <strong>Startup Pitch Night</strong>
+        <span>May 17 · 6:00 PM</span>
+      </div>
+      <div className="home-web-hero__floating-card home-web-hero__floating-card--bottom">
+        <span className="home-web-hero__floating-label">Fast lane</span>
+        <strong>1 tap to apply</strong>
+        <span>Save time across listings</span>
+      </div>
+    </div>
+  </section>
+);
+
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -315,6 +376,9 @@ const HomePage: React.FC = () => {
           </div>
 
           <div ref={desktopScrollRef} style={{ flex: 1, overflowY: "auto" }}>
+            <div className="home-content home-content--hero">
+              <DesktopHero firstName={firstName} headerMeta={headerMeta} navigate={navigate} />
+            </div>
             <Feed activeFilter={activeFilter} setActiveFilter={setActiveFilter}
               navigate={navigate} scrollContainerRef={desktopScrollRef as React.RefObject<HTMLDivElement>} />
           </div>

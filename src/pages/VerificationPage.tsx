@@ -1,6 +1,6 @@
 import { ArrowLeft, Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ErrorMsg from "../components/ErrorMsg";
 import { useUser } from "../context/UserContext";
 
@@ -19,8 +19,20 @@ const maskPhone = (phone: string): string => {
   return `+${country} ${code} *** ** ${last2}`;
 };
 
+const maskContact = (contact: string): string => {
+  if (!contact) return "your contact";
+  if (contact.includes("@")) {
+    const [name, domain] = contact.split("@");
+    if (!domain) return contact;
+    const visibleName = name.length <= 2 ? `${name[0] ?? ""}*` : `${name.slice(0, 2)}***`;
+    return `${visibleName}@${domain}`;
+  }
+  return maskPhone(contact);
+};
+
 export const VerificationPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useUser();
 
   const [code, setCode]           = useState(["", "", "", ""]);
@@ -28,7 +40,11 @@ export const VerificationPage: React.FC = () => {
   const [codeError, setCodeError] = useState("");
   const [shake, setShake]         = useState(false);
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
-  const maskedPhone = user.phone ? maskPhone(user.phone) : "your phone";
+  const pendingContact = (location.state as { contact?: string } | null)?.contact
+    ?? sessionStorage.getItem("universe-reset-contact")
+    ?? user.phone
+    ?? "";
+  const maskedPhone = maskContact(pendingContact);
 
   useEffect(() => { inputs.current[0]?.focus(); }, []);
 
@@ -75,11 +91,13 @@ export const VerificationPage: React.FC = () => {
 
   const verify = () => {
     if (!allFilled) { setCodeError("Enter all 4 digits"); triggerShake(); return; }
+    sessionStorage.setItem("universe-reset-verified", "1");
     navigate("/reset-password");
   };
 
   const resetCode = () => {
     setTimeLeft(80); setCode(["", "", "", ""]); setCodeError("");
+    sessionStorage.setItem("universe-reset-contact", pendingContact);
     setTimeout(() => inputs.current[0]?.focus(), 0);
   };
 
