@@ -13,7 +13,7 @@ const btnStyle = (ready: boolean): React.CSSProperties => ({
   transition: "opacity 0.25s ease",
 });
 
-export const CreatePasswordPage: React.FC = () => {
+export const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirm,  setConfirm]  = useState("");
@@ -88,7 +88,7 @@ export const CreatePasswordPage: React.FC = () => {
           name= "new-password"
           onChange={e => onPwdChange(e.target.value)}
           onBlur={onPwdBlur}
-          placeholder={mobile ? "Create a password" : "Создай пароль"}
+          placeholder={mobile ? "Reset a password" : "Сбросить пароль"}
         />
         <button
           className={mobile ? "field-icon-btn" : "field-eye"}
@@ -160,7 +160,7 @@ export const CreatePasswordPage: React.FC = () => {
         </div>
         <div className="auth-illustration auth-illustration--create-pwd" />
         <div className="auth-body auth-body--centered">
-          <h2 className="auth-title">Create New Password</h2>
+          <h2 className="auth-title">Reset Password</h2>
           <div className="auth-fields">
             {renderPwdField(true)}
             {renderCfmField(true)}
@@ -168,7 +168,7 @@ export const CreatePasswordPage: React.FC = () => {
           <div className="auth-actions">
             <button className="primary-btn" onClick={submit}
               disabled={!isReady} style={btnStyle(isReady)}>
-              Create Account
+              Reset Password
             </button>
           </div>
         </div>
@@ -180,7 +180,7 @@ export const CreatePasswordPage: React.FC = () => {
       <div className="auth-tag">Final Step</div>
 
       <h1 className="auth-h1">
-        Create a
+        Reset Your Password
         <br />
         <em>strong password.</em>
       </h1>
@@ -236,7 +236,7 @@ export const CreatePasswordPage: React.FC = () => {
       </button>
 
       <h2 className="form-card__title">
-        Create Password
+        Reset Your Password
       </h2>
 
       <p className="form-card__subtitle">
@@ -256,7 +256,7 @@ export const CreatePasswordPage: React.FC = () => {
         onClick={submit}
         disabled={!isReady}
       >
-        Create Account <Check size={16} />
+        Reset Your Password <Check size={16} />
       </button>
 
       <div className="form-footer">

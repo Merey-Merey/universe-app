@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/static-components */
 import { ArrowLeft, Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -11,14 +10,12 @@ const btnStyle = (ready: boolean): React.CSSProperties => ({
   transition: "opacity 0.25s ease",
 });
 
-/** Маскирует телефон: "+7 (771) 887 33 37" → "+7 771 *** ** 37" */
 const maskPhone = (phone: string): string => {
-  const digits = phone.replace(/\D/g, ""); // только цифры
+  const digits = phone.replace(/\D/g, "");
   if (digits.length < 7) return phone;
-  // страна (1-2 цифры) + код (3) + скрытые + последние 2
-  const country = digits.slice(0, 1);   // "7"
-  const code    = digits.slice(1, 4);   // "771"
-  const last2   = digits.slice(-2);     // "37"
+  const country = digits.slice(0, 1);   
+  const code    = digits.slice(1, 4);  
+  const last2   = digits.slice(-2);    
   return `+${country} ${code} *** ** ${last2}`;
 };
 
@@ -31,8 +28,6 @@ export const VerificationPage: React.FC = () => {
   const [codeError, setCodeError] = useState("");
   const [shake, setShake]         = useState(false);
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
-
-  // показываем маскированный номер из контекста
   const maskedPhone = user.phone ? maskPhone(user.phone) : "your phone";
 
   useEffect(() => { inputs.current[0]?.focus(); }, []);
@@ -80,7 +75,7 @@ export const VerificationPage: React.FC = () => {
 
   const verify = () => {
     if (!allFilled) { setCodeError("Enter all 4 digits"); triggerShake(); return; }
-    navigate("/create-password");
+    navigate("/reset-password");
   };
 
   const resetCode = () => {
@@ -88,7 +83,7 @@ export const VerificationPage: React.FC = () => {
     setTimeout(() => inputs.current[0]?.focus(), 0);
   };
 
-  const OtpRow = () => (
+  const renderOtpRow = () => (
     <div className="otp-row" style={shake ? { animation: "otp-shake 0.4s ease" } : {}}>
       {code.map((digit, i) => (
         <input key={i} ref={el => { inputs.current[i] = el; }}
@@ -119,7 +114,6 @@ export const VerificationPage: React.FC = () => {
         }
       `}</style>
 
-      {/* MOBILE */}
       <div className="page-wrapper mobile-only">
         <div className="auth-header">
           <button className="back-btn" onClick={() => navigate(-1)}>
@@ -130,7 +124,7 @@ export const VerificationPage: React.FC = () => {
         <div className="auth-body auth-body--centeredd">
           <h2 className="auth-titlee">Verification code</h2>
           <p className="auth-subtitlee">A 4-digit code has been sent to {maskedPhone}</p>
-          <OtpRow />
+          {renderOtpRow()}
           {codeError && <div style={{ marginTop:-4, marginBottom:4 }}><ErrorMsg message={codeError} /></div>}
           <div className="auth-actions">
             <button className="primary-btn" onClick={verify}
@@ -145,7 +139,6 @@ export const VerificationPage: React.FC = () => {
         </div>
       </div>
 
-      {/* DESKTOP */}
       <div className="auth-page desktop-only">
         <div className="auth-left">
           <div className="auth-left__top">
@@ -183,7 +176,7 @@ export const VerificationPage: React.FC = () => {
               A 4-digit code was sent to {maskedPhone}
             </p>
 
-            <OtpRow />
+            {renderOtpRow()}
 
             {codeError && (
               <div style={{ textAlign:"center", marginTop:-8, marginBottom:8 }}>

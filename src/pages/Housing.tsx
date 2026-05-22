@@ -26,6 +26,8 @@ import {
   Map as MapIcon,
   X,
 } from "lucide-react";
+import { getHousing } from "../firebase/housingService";
+import { useAuth } from "../context/AuthContext";
 
 
 export interface HousingItem {
@@ -166,18 +168,34 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
 </nav>
 
       <div className="home-sidebar__bottom">
-        <div className="home-sidebar__user">
-          <div className="home-sidebar__avatar">AB</div>
-          <div>
-            <div className="home-sidebar__user-name">Aymakhan Balausa</div>
-            <div className="home-sidebar__user-meta">Shymkent · Student</div>
-          </div>
-        </div>
-        <button className="home-sidebar__item" style={{ marginTop: 4, color: "rgba(255,255,255,0.4)" }} onClick={() => navigate("/login")}>
-          <LogOut size={20} /> Log out
-        </button>
+        <SidebarUserBlock />
       </div>
     </aside>
+  );
+};
+
+const SidebarUserBlock: React.FC = () => {
+  const navigate = useNavigate();
+  const { profile, signOut: firebaseSignOut } = useAuth();
+  const initials = profile?.fullName
+    ? profile.fullName.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase()
+    : "?";
+  return (
+    <>
+      <div className="home-sidebar__user">
+        <div className="home-sidebar__avatar">{initials}</div>
+        <div>
+          <div className="home-sidebar__user-name">{profile?.fullName || "—"}</div>
+          <div className="home-sidebar__user-meta">
+            {[profile?.city, profile?.role].filter(Boolean).join(" · ") || "Student"}
+          </div>
+        </div>
+      </div>
+      <button className="home-sidebar__item" style={{ marginTop: 4, color: "rgba(255,255,255,0.4)" }}
+        onClick={() => { firebaseSignOut(); navigate("/login"); }}>
+        <LogOut size={20} /> Log out
+      </button>
+    </>
   );
 };
 
@@ -226,6 +244,7 @@ const SearchDropdown: React.FC<{ items: HousingItem[]; onSelect: (h: HousingItem
 
 export const HousingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [activeNav, setActiveNav] = useState("housing");
   const [showSearch, setShowSearch] = useState(false);
   const [searchVal, setSearchVal] = useState("");
@@ -233,14 +252,25 @@ export const HousingPage: React.FC = () => {
   const [showList, setShowList] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
+  const [housingData, setHousingData] = useState<HousingItem[]>(HOUSING);
   const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    getHousing().then(items => {
+      if (items.length > 0) {
+        // Map Firestore string ids to numeric for compatibility
+        setHousingData(items.map((h, i) => ({ ...h, id: i + 1 } as unknown as HousingItem)));
+      }
+    }).catch(() => {/* use static fallback */});
+  }, []);
 
   useEffect(() => { if (showSearch) setTimeout(() => searchRef.current?.focus(), 50); }, [showSearch]);
 
-  const suggestions = HOUSING.filter(h =>
+  const suggestions = housingData.filter(h =>
     searchVal.length > 0 && (h.name.toLowerCase().includes(searchVal.toLowerCase()) || h.address.toLowerCase().includes(searchVal.toLowerCase()))
   );
-  const filtered = HOUSING.filter(h => !searchVal || h.name.toLowerCase().includes(searchVal.toLowerCase()) || h.address.toLowerCase().includes(searchVal.toLowerCase()));
+  const filtered = housingData.filter(h => !searchVal || h.name.toLowerCase().includes(searchVal.toLowerCase()) || h.address.toLowerCase().includes(searchVal.toLowerCase()));
+  void profile; // available for future use
 
   return (
     <div className="home-screen">

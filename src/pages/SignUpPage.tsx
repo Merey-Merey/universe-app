@@ -84,7 +84,7 @@ const SignUpPage: React.FC = () => {
       avatarLetter: getAvatarLetter(form.name),
     }));
 
-    navigate("/verification");
+    navigate("/create-password");
   };
 
   return (

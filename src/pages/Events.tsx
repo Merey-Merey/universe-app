@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react-hooks/static-components */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Home, BriefcaseBusiness, Building2, Calendar, User,
@@ -8,6 +8,8 @@ import {
   ChevronDown, Users, BookOpen,
 } from "lucide-react";
 import { useUser } from "../context/UserContext";
+import { getEvents } from "../firebase/eventsService";
+import { useAuth } from "../context/AuthContext";
 
 export interface EventItem {
   id: number;
@@ -69,6 +71,10 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
 }) => {
   const navigate = useNavigate();
   const { user } = useUser();
+  function firebaseSignOut() {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <aside className="home-sidebar">
       <div className="home-sidebar__logo">
@@ -105,7 +111,7 @@ const Sidebar: React.FC<{ activeNav: string; setActiveNav: (v: string) => void }
         </div>
         <button className="home-sidebar__item"
           style={{ marginTop: 4, color: "rgba(255,255,255,0.4)" }}
-          onClick={() => navigate("/login")}>
+          onClick={() => { firebaseSignOut(); navigate("/login"); }}>
           <LogOut size={20} /> Log out
         </button>
       </div>
@@ -172,15 +178,27 @@ const EventTicket: React.FC<{
 
 export const EventsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { profile, signOut: firebaseSignOut } = useAuth();
   const [activeNav,   setActiveNav]   = useState("events");
   const [activeMonth, setActiveMonth] = useState("May");
   const [activeCat,   setActiveCat]   = useState("All");
   const [savedIds,    setSavedIds]    = useState<number[]>([3]);
+  const [eventsData,  setEventsData]  = useState<EventItem[]>(EVENTS);
+
+  useEffect(() => {
+    getEvents().then(items => {
+      if (items.length > 0) {
+        setEventsData(items.map((e, i) => ({ ...e, id: i + 1 } as unknown as EventItem)));
+      }
+    }).catch(() => {/* use static fallback */});
+  }, []);
+
+  void profile; void firebaseSignOut;
 
   const toggleSave = (id: number) =>
     setSavedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
-  const filtered = EVENTS.filter(e => {
+  const filtered = eventsData.filter(e => {
     const matchCat = activeCat === "All" || e.category === activeCat ||
       (activeCat === "Free" && !e.price);
     return matchCat;
@@ -422,7 +440,7 @@ export const EventRegisterPage: React.FC = () => {
 
   const stepDefs = [{ num:1, label:"Info" },{ num:2, label:"Preferences" },{ num:3, label:"Confirm" }];
 
-  const Stepper = () => (
+  const renderStepper = () => (
     <div className="ev-reg-stepper">
       {stepDefs.map((s, i) => (
         <React.Fragment key={s.num}>
@@ -445,7 +463,7 @@ export const EventRegisterPage: React.FC = () => {
     </div>
   );
 
-  const MiniCard = () => (
+  const renderMiniCard = () => (
     <div className="ev-mini-card">
       <div className="ev-mini-card__inner">
         <div className="ev-list-item__datebox" style={{ background:"#EDE9FE" }}>
@@ -464,11 +482,13 @@ export const EventRegisterPage: React.FC = () => {
     </div>
   );
 
-  const Field: React.FC<{
+  const renderField = ({
+    label, value, onChange, placeholder, type = "text", optional, select,
+  }: {
     label:string; value:string; onChange:(v:string)=>void;
     placeholder?:string; type?:string; optional?:boolean;
     select?:{options:string[]};
-  }> = ({ label,value,onChange,placeholder,type="text",optional,select }) => (
+  }) => (
     <div className="ev-reg-field">
       <label className="ev-reg-field__label">
         {label}{optional && <span style={{color:"#A09DC5",fontWeight:400}}> (optional)</span>}
@@ -488,16 +508,20 @@ export const EventRegisterPage: React.FC = () => {
     </div>
   );
 
-  const Step1 = () => (
+  const renderStep1 = () => (
     <div className="ev-reg-form">
       <p className="ev-reg-section-label">PERSONAL INFO</p>
-      <Field label="Full Name" value={fullName} onChange={setFullName}/>
-      <Field label="Email" value={email} onChange={setEmail} type="email"/>
-      <Field label="Phone number" value={phone} onChange={setPhone} type="tel"/>
+      {renderField({ label: "Full Name", value: fullName, onChange: setFullName })}
+      {renderField({ label: "Email", value: email, onChange: setEmail, type: "email" })}
+      {renderField({ label: "Phone number", value: phone, onChange: setPhone, type: "tel" })}
       <p className="ev-reg-section-label" style={{marginTop:8}}>ACADEMIC INFO</p>
-      <Field label="University" value={university} onChange={setUniversity}
-        select={{options:["SKSU","SDU","IITU","KazNU","Other"]}}/>
-      <Field label="Faculty / Major" value={faculty} onChange={setFaculty}/>
+      {renderField({
+        label: "University",
+        value: university,
+        onChange: setUniversity,
+        select: { options: ["SKSU", "SDU", "IITU", "KazNU", "Other"] },
+      })}
+      {renderField({ label: "Faculty / Major", value: faculty, onChange: setFaculty })}
       <div className="ev-reg-field">
         <label className="ev-reg-field__label">Year of study</label>
         <div className="ev-chip-row">
@@ -507,13 +531,18 @@ export const EventRegisterPage: React.FC = () => {
           ))}
         </div>
       </div>
-      <Field label="LinkedIn" value={linkedin} onChange={setLinkedin}
-        placeholder="linkedin.com/in/username" optional/>
+      {renderField({
+        label: "LinkedIn",
+        value: linkedin,
+        onChange: setLinkedin,
+        placeholder: "linkedin.com/in/username",
+        optional: true,
+      })}
       <button className="ev-reg-next-btn" onClick={()=>setStep(2)}>Continue to Preferences</button>
     </div>
   );
 
-  const Step2 = () => (
+  const renderStep2 = () => (
     <div className="ev-reg-form">
       <p className="ev-reg-section-label">ATTENDANCE</p>
       <div className="ev-reg-field">
@@ -574,7 +603,7 @@ export const EventRegisterPage: React.FC = () => {
           placeholder="Dietary needs, accessibility, others......"
           value={specialReqs} onChange={e=>setSpecialReqs(e.target.value)}/>
       </div>
-      <Field label="City" value={city} onChange={setCity} placeholder="Your city" optional/>
+      {renderField({ label: "City", value: city, onChange: setCity, placeholder: "Your city", optional: true })}
       <div className="ev-reg-btn-row">
         <button className="ev-reg-back-btn" onClick={()=>setStep(1)}>← Back</button>
         <button className="ev-reg-next-btn" style={{flex:1}} onClick={()=>setStep(3)}>
@@ -585,20 +614,20 @@ export const EventRegisterPage: React.FC = () => {
   );
   const { registerEvent } = useUser();
 
-  const Step3 = () => {
-    const ReviewRow: React.FC<{label:string;value:string;onEdit:()=>void}> = ({label,value,onEdit}) => (
-      <>
-        <div className="ev-review-row">
-          <div className="ev-review-row__info">
-            <span className="ev-review-row__label">{label}</span>
-            <span className="ev-review-row__value">{value}</span>
-          </div>
-          <button className="ev-review-row__edit" onClick={onEdit}>Edit</button>
+  const renderReviewRow = ({ label, value, onEdit }: {label:string;value:string;onEdit:()=>void}) => (
+    <>
+      <div className="ev-review-row">
+        <div className="ev-review-row__info">
+          <span className="ev-review-row__label">{label}</span>
+          <span className="ev-review-row__value">{value}</span>
         </div>
-        <div className="ev-review-divider"/>
-      </>
-    );
+        <button className="ev-review-row__edit" onClick={onEdit}>Edit</button>
+      </div>
+      <div className="ev-review-divider"/>
+    </>
+  );
 
+  const renderStep3 = () => {
     const handleSubmit = () => {
       registerEvent(event.id);
       navigate(`/events/${event.id}/success`);
@@ -608,16 +637,16 @@ export const EventRegisterPage: React.FC = () => {
       <div className="ev-reg-form">
         <p className="ev-reg-section-label">REVIEW YOUR INFO</p>
         <div className="ev-review-card">
-          <ReviewRow label="Full name" value={fullName} onEdit={()=>setStep(1)}/>
-          <ReviewRow label="Email" value={email} onEdit={()=>setStep(1)}/>
-          <ReviewRow label="Phone" value={phone} onEdit={()=>setStep(1)}/>
-          <ReviewRow label="University · Year" value={`${university} · ${year} year`} onEdit={()=>setStep(1)}/>
+          {renderReviewRow({ label: "Full name", value: fullName, onEdit: ()=>setStep(1) })}
+          {renderReviewRow({ label: "Email", value: email, onEdit: ()=>setStep(1) })}
+          {renderReviewRow({ label: "Phone", value: phone, onEdit: ()=>setStep(1) })}
+          {renderReviewRow({ label: "University · Year", value: `${university} · ${year} year`, onEdit: ()=>setStep(1) })}
         </div>
 
         <p className="ev-reg-section-label">YOUR PREFERENCES</p>
         <div className="ev-review-card">
-          <ReviewRow label="Attendance" value={attendance} onEdit={()=>setStep(2)}/>
-          <ReviewRow label="Role · Level" value={`${role} · ${expLabel}`} onEdit={()=>setStep(2)}/>
+          {renderReviewRow({ label: "Attendance", value: attendance, onEdit: ()=>setStep(2) })}
+          {renderReviewRow({ label: "Role · Level", value: `${role} · ${expLabel}`, onEdit: ()=>setStep(2) })}
         </div>
 
         <p className="ev-reg-section-label">SELECTED INTERESTS</p>
@@ -644,7 +673,7 @@ export const EventRegisterPage: React.FC = () => {
     );
   };
 
-  const PageContent = () => (
+  const renderPageContent = () => (
     <>
       <div className="ann-page-topbar">
         <button className="ann-back-btn" onClick={()=>navigate(-1)}>
@@ -654,11 +683,11 @@ export const EventRegisterPage: React.FC = () => {
         <div style={{width:40}}/>
       </div>
       <div style={{padding:"0 16px 48px",display:"flex",flexDirection:"column",gap:16}}>
-        <MiniCard/>
-        <Stepper/>
-        {step===1 && <Step1/>}
-        {step===2 && <Step2/>}
-        {step===3 && <Step3/>}
+        {renderMiniCard()}
+        {renderStepper()}
+        {step===1 && renderStep1()}
+        {step===2 && renderStep2()}
+        {step===3 && renderStep3()}
       </div>
     </>
   );
@@ -666,7 +695,7 @@ export const EventRegisterPage: React.FC = () => {
   return (
     <div className="home-screen">
       <div className="home-mobile" style={{flexDirection:"column",height:"100vh",overflow:"hidden"}}>
-        <div style={{flex:1,overflowY:"auto"}}><PageContent/></div>
+        <div style={{flex:1,overflowY:"auto"}}>{renderPageContent()}</div>
       </div>
       <div className="home-desktop" style={{flex:1}}>
         <Sidebar activeNav="events" setActiveNav={()=>{}}/>
@@ -687,11 +716,11 @@ export const EventRegisterPage: React.FC = () => {
           <div className="home-content">
             <div className="ann-detail-desk-layout">
               <div className="ann-detail-desk-main" style={{maxWidth:520}}>
-                <MiniCard/>
-                <div style={{marginTop:16}}><Stepper/></div>
-                {step===1 && <Step1/>}
-                {step===2 && <Step2/>}
-                {step===3 && <Step3/>}
+                {renderMiniCard()}
+                <div style={{marginTop:16}}>{renderStepper()}</div>
+                {step===1 && renderStep1()}
+                {step===2 && renderStep2()}
+                {step===3 && renderStep3()}
               </div>
               <div className="ann-detail-desk-aside">
                 <h3 className="ann-detail-desk-aside__title">Other Events</h3>

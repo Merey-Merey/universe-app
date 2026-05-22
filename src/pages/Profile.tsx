@@ -9,6 +9,7 @@ import {
   Eye, EyeOff, Trash2,
 } from "lucide-react";
 import { useUser, getInitials, getAvatarLetter } from "../context/UserContext";
+import { useAuth } from "../context/AuthContext";
 import { JOBS } from "./Jobs";        
 import * as HousingModule from "./Housing";
 
@@ -246,12 +247,17 @@ export const BasicInfoPage: React.FC = () => {
     setAvatarUrl(URL.createObjectURL(file));
   }, []);
 
-  const handleSave = () => {
+  const { updateProfile } = useAuth();
+
+  const handleSave = async () => {
     setUser(u => ({
       ...u, fullName, email, phone, university, faculty, year, avatarUrl,
       initials:     getInitials(fullName),
       avatarLetter: getAvatarLetter(fullName),
     }));
+    try {
+      await updateProfile({ fullName, email, phone, university, faculty, year });
+    } catch {/* ignore offline */}
     navigate(-1);
   };
 

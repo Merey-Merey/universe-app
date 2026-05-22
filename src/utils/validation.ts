@@ -17,9 +17,8 @@ export const validate = {
     return "";
   },
   password: (v: string) => {
-    if (!v) return "Введи пароль";
-    if (v.length < 8) return "Минимум 8 символов";
-    if (!/[A-Z]/.test(v)) return "Добавь заглавную букву";
+    if (!v.trim()) return "Введи пароль";
+    if (v.length < 6) return "Минимум 8 символов";
     if (!/[0-9]/.test(v)) return "Добавь цифру";
     return "";
   },
