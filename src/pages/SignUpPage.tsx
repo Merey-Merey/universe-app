@@ -2,13 +2,44 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { FirebaseError } from "firebase/app";
 import { validate } from "../utils/validation";
 import { formatKzPhone, isKzPhoneComplete } from "../utils/phoneFormat";
 import ErrorMsg from "../components/ErrorMsg";
 import { useUser, getInitials, getAvatarLetter } from "../context/UserContext";
+import { signInWithGoogle } from "../firebase/authService";
+import { getUserProfile } from "../firebase/userService";
+import { buildAppUserFromAuth } from "../utils/authUser";
 
 const fieldBorder = (err: string): React.CSSProperties =>
   err ? { border: "1.5px solid #EF4444", borderRadius: 12 } : {};
+
+const GoogleIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 48 48">
+    <path d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.4 5.6-5 7.3v6h8.1c4.8-4.4 7.2-10.9 7.2-17.4z" fill="#4285F4"/>
+    <path d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-8.1-6c-2.1 1.4-4.8 2.2-7.8 2.2-6 0-11-4-12.8-9.5H2.9v6.2C6.8 42.5 14.8 48 24 48z" fill="#34A853"/>
+    <path d="M11.2 28.9c-.5-1.4-.7-2.9-.7-4.4s.3-3 .7-4.4v-6.2H2.9C1 17.6 0 20.7 0 24s1 6.4 2.9 9.1l8.3-4.2z" fill="#FBBC05"/>
+    <path d="M24 9.5c3.4 0 6.4 1.2 8.8 3.4l6.6-6.6C35.9 2.4 30.4 0 24 0 14.8 0 6.8 5.5 2.9 13.9l8.3 6.2C12.9 13.5 18 9.5 24 9.5z" fill="#EA4335"/>
+  </svg>
+);
+
+const getGoogleAuthErrorMessage = (error: unknown) => {
+  if (error instanceof FirebaseError) {
+    if (error.code === "auth/popup-closed-by-user" || error.code === "auth/cancelled-popup-request") {
+      return "Google sign-in was cancelled.";
+    }
+
+    if (error.code === "auth/unauthorized-domain") {
+      return "This domain is not authorized for Google sign-in in Firebase.";
+    }
+
+    if (error.code === "auth/operation-not-allowed") {
+      return "Google sign-in is not enabled in Firebase Authentication.";
+    }
+  }
+
+  return "Google sign-in could not be completed. Please try again.";
+};
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +47,8 @@ const SignUpPage: React.FC = () => {
   const [form, setForm]       = useState({ name: "", email: "", phone: "+7 (" });
   const [errors, setErrors]   = useState({ name: "", email: "", phone: "" });
   const [touched, setTouched] = useState({ name: false, email: false, phone: false });
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatKzPhone(e.target.value);
@@ -63,6 +96,25 @@ const SignUpPage: React.FC = () => {
     !validate.name(form.name) &&
     !validate.email(form.email) &&
     isKzPhoneComplete(form.phone);
+
+  const hydrateUser = async (uid: string, fallbackUser: { displayName: string | null; email: string | null; photoURL: string | null; }) => {
+    const profile = await getUserProfile(uid);
+    setUser(prev => buildAppUserFromAuth(fallbackUser, profile, prev));
+  };
+
+  const submitGoogle = async () => {
+    setAuthError("");
+    setGoogleLoading(true);
+    try {
+      const credential = await signInWithGoogle();
+      await hydrateUser(credential.user.uid, credential.user);
+      navigate("/home");
+    } catch (error) {
+      setAuthError(getGoogleAuthErrorMessage(error));
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const submit = () => {
     const e = {
@@ -136,13 +188,14 @@ const SignUpPage: React.FC = () => {
               <span className="auth-link">terms and conditions</span> and{" "}
               <span className="auth-link">Privacy Policy.</span>
             </p>
+            <ErrorMsg message={authError} />
           </div>
 
           <div className="auth-actions">
             <button
               className="primary-btn"
               onClick={submit}
-              disabled={!isFormReady}
+              disabled={!isFormReady || googleLoading}
               style={{
                 opacity: isFormReady ? 1 : 0.45,
                 cursor: isFormReady ? "pointer" : "not-allowed",
@@ -150,6 +203,12 @@ const SignUpPage: React.FC = () => {
               }}
             >
               Create Password
+            </button>
+            <div className="divider-row">
+              <span className="divider-line" /><span className="divider-text">or</span><span className="divider-line" />
+            </div>
+            <button className="google-btn" type="button" onClick={submitGoogle} disabled={googleLoading}>
+              <GoogleIcon />{googleLoading ? "Connecting..." : "Sign up with Google"}
             </button>
             <p className="auth-footer-text">
               Joined us before?{" "}
@@ -236,9 +295,22 @@ const SignUpPage: React.FC = () => {
 
             <button className="primary-btn"
               style={{ marginTop:12, opacity:isFormReady?1:0.45, cursor:isFormReady?"pointer":"not-allowed", transition:"opacity 0.25s ease" }}
-              onClick={submit} disabled={!isFormReady}>
+              onClick={submit} disabled={!isFormReady || googleLoading}>
               Create Account <ArrowRight size={16} />
             </button>
+
+            <div className="divider-row">
+              <span className="divider-line" />
+              <span className="divider-text">or</span>
+              <span className="divider-line" />
+            </div>
+
+            <button className="google-btn" type="button" onClick={submitGoogle} disabled={googleLoading}>
+              <GoogleIcon />
+              {googleLoading ? "Connecting..." : "Continue with Google"}
+            </button>
+
+            <ErrorMsg message={authError} />
 
             <p className="form-terms">
               By signing up, you agree to our{" "}

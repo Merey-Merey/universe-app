@@ -12,6 +12,12 @@ import {
 import { auth } from "./config";
 import { createUserProfile } from "./userService";
 
+const getGoogleProvider = () => {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  return provider;
+};
+
 export const signIn = (email: string, password: string): Promise<UserCredential> =>
   signInWithEmailAndPassword(auth, email, password);
 
@@ -26,7 +32,7 @@ export const signUp = async (
 };
 
 export const signInWithGoogle = async (): Promise<UserCredential> => {
-  const provider = new GoogleAuthProvider();
+  const provider = getGoogleProvider();
   const credential = await signInWithPopup(auth, provider);
   await createUserProfile(credential.user.uid, {
     fullName: credential.user.displayName ?? "",
@@ -37,7 +43,7 @@ export const signInWithGoogle = async (): Promise<UserCredential> => {
 };
 
 export const startGoogleRedirectSignIn = async (): Promise<void> => {
-  const provider = new GoogleAuthProvider();
+  const provider = getGoogleProvider();
   await signInWithRedirect(auth, provider);
 };
 

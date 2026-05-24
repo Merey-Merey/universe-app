@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { FirebaseError } from "firebase/app";
 import { validate } from "../utils/validation";
 import ErrorMsg from "../components/ErrorMsg";
-import { getGoogleRedirectSignInResult, signIn } from "../firebase/authService";
+import { signIn, signInWithGoogle } from "../firebase/authService";
 import { getUserProfile } from "../firebase/userService";
 import { buildAppUserFromAuth } from "../utils/authUser";
 import { useUser } from "../context/UserContext";
@@ -11,14 +12,14 @@ import { useUser } from "../context/UserContext";
 const fieldBorder = (err: string): React.CSSProperties =>
   err ? { border: "1.5px solid #EF4444", borderRadius: 12 } : {};
 
-// const GoogleIcon = () => (
-//   <svg width="16" height="16" viewBox="0 0 48 48">
-//     <path d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.4 5.6-5 7.3v6h8.1c4.8-4.4 7.2-10.9 7.2-17.4z" fill="#4285F4"/>
-//     <path d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-8.1-6c-2.1 1.4-4.8 2.2-7.8 2.2-6 0-11-4-12.8-9.5H2.9v6.2C6.8 42.5 14.8 48 24 48z" fill="#34A853"/>
-//     <path d="M11.2 28.9c-.5-1.4-.7-2.9-.7-4.4s.3-3 .7-4.4v-6.2H2.9C1 17.6 0 20.7 0 24s1 6.4 2.9 9.1l8.3-4.2z" fill="#FBBC05"/>
-//     <path d="M24 9.5c3.4 0 6.4 1.2 8.8 3.4l6.6-6.6C35.9 2.4 30.4 0 24 0 14.8 0 6.8 5.5 2.9 13.9l8.3 6.2C12.9 13.5 18 9.5 24 9.5z" fill="#EA4335"/>
-//   </svg>
-// );
+const GoogleIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 48 48">
+    <path d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.4 5.6-5 7.3v6h8.1c4.8-4.4 7.2-10.9 7.2-17.4z" fill="#4285F4"/>
+    <path d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-8.1-6c-2.1 1.4-4.8 2.2-7.8 2.2-6 0-11-4-12.8-9.5H2.9v6.2C6.8 42.5 14.8 48 24 48z" fill="#34A853"/>
+    <path d="M11.2 28.9c-.5-1.4-.7-2.9-.7-4.4s.3-3 .7-4.4v-6.2H2.9C1 17.6 0 20.7 0 24s1 6.4 2.9 9.1l8.3-4.2z" fill="#FBBC05"/>
+    <path d="M24 9.5c3.4 0 6.4 1.2 8.8 3.4l6.6-6.6C35.9 2.4 30.4 0 24 0 14.8 0 6.8 5.5 2.9 13.9l8.3 6.2C12.9 13.5 18 9.5 24 9.5z" fill="#EA4335"/>
+  </svg>
+);
 const MailIcon = () => (
   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
     <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/>
@@ -29,6 +30,24 @@ const LockIcon = () => (
     <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
   </svg>
 );
+
+const getGoogleAuthErrorMessage = (error: unknown) => {
+  if (error instanceof FirebaseError) {
+    if (error.code === "auth/popup-closed-by-user" || error.code === "auth/cancelled-popup-request") {
+      return "Google sign-in was cancelled.";
+    }
+
+    if (error.code === "auth/unauthorized-domain") {
+      return "This domain is not authorized for Google sign-in in Firebase.";
+    }
+
+    if (error.code === "auth/operation-not-allowed") {
+      return "Google sign-in is not enabled in Firebase Authentication.";
+    }
+  }
+
+  return "Google sign-in could not be completed. Please try again.";
+};
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -63,29 +82,6 @@ const LoginPage: React.FC = () => {
     setUser(prev => buildAppUserFromAuth(fallbackUser, profile, prev));
   };
 
-  useEffect(() => {
-    let active = true;
-
-    const restoreGoogleRedirect = async () => {
-      try {
-        const credential = await getGoogleRedirectSignInResult();
-        if (!credential || !active) return;
-        await hydrateUser(credential.user.uid, credential.user);
-        navigate("/home");
-      } catch {
-        if (active) setAuthError("Google sign-in could not be completed.");
-      } finally {
-        if (active) setGoogleLoading(false);
-      }
-    };
-
-    restoreGoogleRedirect();
-
-    return () => {
-      active = false;
-    };
-  }, [navigate]);
-
   const submit = async () => {
     const e = {
       email:    validate.email(form.email),
@@ -108,18 +104,19 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  // const submitGoogle = async () => {
-  //   setAuthError("");
-  //   setGoogleLoading(true);
-  //   try {
-  //     await startGoogleRedirectSignIn();
-  //   } catch {
-  //     setAuthError("Google sign-in was cancelled or failed. Please try again.");
-  //     setGoogleLoading(false);
-  //   } finally {
-  //     // Redirect sign-in leaves the page before this matters in the success case.
-  //   }
-  // };
+  const submitGoogle = async () => {
+    setAuthError("");
+    setGoogleLoading(true);
+    try {
+      const credential = await signInWithGoogle();
+      await hydrateUser(credential.user.uid, credential.user);
+      navigate("/home");
+    } catch (error) {
+      setAuthError(getGoogleAuthErrorMessage(error));
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   return (
     <>
@@ -172,9 +169,9 @@ const LoginPage: React.FC = () => {
             <div className="divider-row">
               <span className="divider-line" /><span className="divider-text">or</span><span className="divider-line" />
             </div>
-            {/* <button className="google-btn" type="button" onClick={submitGoogle} disabled={loading || googleLoading}>
+            <button className="google-btn" type="button" onClick={submitGoogle} disabled={loading || googleLoading}>
               <GoogleIcon />{googleLoading ? "Connecting..." : "Login with Google"}
-            </button> */}
+            </button> 
             <p className="auth-footer-text">
               Don't have an account?{" "}
               <span className="auth-link auth-link--bold" onClick={() => navigate("/sign-up")}>Sign Up</span>
@@ -347,11 +344,11 @@ const LoginPage: React.FC = () => {
         <span className="divider-text">or</span>
         <span className="divider-line" />
       </div>
-{/* 
+ 
       <button className="google-btn" type="button" onClick={submitGoogle} disabled={loading || googleLoading}>
         <GoogleIcon />
         {googleLoading ? "Connecting..." : "Continue with Google"}
-      </button> */}
+      </button> 
 
       <div className="form-footer">
         Don’t have an account?{" "}
